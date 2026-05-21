@@ -23,13 +23,31 @@ body {
   align-items: center;
 }
 
+.mount-patch img {
+  width: 120px;
+  height: 120px;
+
+  object-fit: contain;
+}
+
 .mount-card h2 {
-  min-height: 80px;
+  min-height: 40px;
 }
 
 .mount-card img {
     width: 100%;
     border-radius: 8px;
-    
 }
+
+.source-mount {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.source-mount img {
+  width: 32px;
+}
+
+
 
