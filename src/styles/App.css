@@ -1,0 +1,35 @@
+body {
+    background-color: #1a1a1a;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.mount-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.mount-card {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+  width: 220px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mount-card h2 {
+  min-height: 80px;
+}
+
+.mount-card img {
+    width: 100%;
+    border-radius: 8px;
+    
+}
+
