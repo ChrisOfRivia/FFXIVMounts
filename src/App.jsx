@@ -108,17 +108,11 @@ function App() {
   ]
 
   const filteredMounts = mounts.filter((mount) => {
-    const mountType =
-      mount.sources?.[0]?.type || "Unknown"
+    const mountType = mount.sources?.[0]?.type || "Unknown"
+    const expansion = getExpansion(mount.patch)
 
-    const expansion =
-      getExpansion(mount.patch)
-
-    const matchesType =
-      selectedTypes.length === 0 || selectedTypes.includes(mountType)
-
-    const matchesExpansion =
-      selectedExpansions.length === 0 || selectedExpansions.includes(expansion)
+    const matchesType = selectedTypes.length === 0 || selectedTypes.includes(mountType)
+    const matchesExpansion = selectedExpansions.length === 0 || selectedExpansions.includes(expansion)
 
     return matchesType && matchesExpansion
   })
@@ -156,17 +150,15 @@ function App() {
                   <p className="type-category-title">{group.label}</p>
 
                   <div className="type-category-buttons">
-                    {group.types.map((type) => {
-                      return (
-                        <button
-                          key={type}
-                          className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
-                          onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
-                        >
-                          <img src={sourceIcons[type]} alt={type} />
-                        </button>
-                      )
-                    })}
+                    {group.types.map((type) => (
+                      <button
+                        key={type}
+                        className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
+                        onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
+                      >
+                        <img src={sourceIcons[type]} alt={type} />
+                      </button>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -190,8 +182,8 @@ function App() {
                   key={expansion.code}
                   className={
                     selectedExpansions.includes(expansion.code)
-                        ? "filter-button expansion-button expansion-card active"
-                        : "filter-button expansion-button expansion-card"
+                      ? "filter-button expansion-button expansion-card active"
+                      : "filter-button expansion-button expansion-card"
                   }
                   title={expansion.fullName}
                   onClick={() =>
