@@ -49,9 +49,12 @@ https://ffxivcollect.com/
 
 ## Future Ideas
 
-- Search functionality
 - Owned / unowned tracking
 - Favorites system
+- Character integration
+- UI/UX improvements
+- Card pop-up display with further information
+- Clickable source
 
 ---
 
