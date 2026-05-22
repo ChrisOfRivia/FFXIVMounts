@@ -4,6 +4,7 @@ function App() {
   const [mounts, setMounts] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedExpansions, setSelectedExpansions] = useState([])
+  const [searchQuery, setSearchQuery] = useState("")
   const [showProjectNotice, setShowProjectNotice] = useState(true)
 
   useEffect(() => {
@@ -119,11 +120,16 @@ function App() {
   const filteredMounts = mounts.filter((mount) => {
     const mountType = mount.sources?.[0]?.type || "Unknown"
     const expansion = getExpansion(mount.patch)
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    const matchesSearch =
+      normalizedQuery === "" ||
+      mount.name.toLowerCase().includes(normalizedQuery) ||
+      (mount.sources?.[0]?.text || "").toLowerCase().includes(normalizedQuery)
 
     const matchesType = selectedTypes.length === 0 || selectedTypes.includes(mountType)
     const matchesExpansion = selectedExpansions.length === 0 || selectedExpansions.includes(expansion)
 
-    return matchesType && matchesExpansion
+    return matchesType && matchesExpansion && matchesSearch
   })
 
   function toggleSelection(value, selectedValues, setSelectedValues) {
@@ -160,6 +166,17 @@ function App() {
         <aside className="filters-sidebar">
           <div className="filters-panel">
             <h2>Filters</h2>
+
+            <div className="search-filter">
+              <input
+                type="search"
+                className="search-input"
+                placeholder="Search mounts..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="Search mounts"
+              />
+            </div>
 
             <div className="filter-group">
               <div className="filter-heading">
