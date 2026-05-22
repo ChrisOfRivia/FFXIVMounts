@@ -150,7 +150,7 @@ function App() {
             <p className="project-notice-eyebrow">Heads Up</p>
             <h2 id="project-notice-title">This project is still unfinished.</h2>
             <p className="project-notice-text">
-              Some features, styling, and data handling are still in progress, so things may change or break while the tracker is being built out.
+              Some features, styling and data handling are still in progress, so things may change or break while the tracker is being built out.
             </p>
             <button
               className="project-notice-button"
