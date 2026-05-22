@@ -265,7 +265,7 @@ function App() {
                 <div className="mount-image">
                   <img src={mount.image} />
                 </div>
-                <div>
+                <div className="mount-owned">
                   <h4>Owned by: {mount.owned}</h4>
                 </div>
 
