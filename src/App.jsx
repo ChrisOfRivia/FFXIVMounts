@@ -45,6 +45,68 @@ function App() {
     "Other": "/icons/special.png",
   }
 
+  const typeGroups = [
+    {
+      label: "Instances",
+      types: ["Dungeon", "Trial", "Raid", "Chaotic Raid", "Deep Dungeon", "V&C Dungeon"],
+    },
+    {
+      label: "Exploration",
+      types: ["Eureka", "Bozja", "Occult Crescent", "Treasure Hunt", "Voyages"],
+    },
+    {
+      label: "Progression",
+      types: ["Quest", "Achievement", "Hunts", "FATE", "Wondrous Tails"],
+    },
+    {
+      label: "Side Content",
+      types: ["Tribal", "Island Sanctuary", "Gold Saucer", "Skybuilders", "Gathering", "Crafting"],
+    },
+    {
+      label: "Special",
+      types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "Other", "Unknown"],
+    },
+  ]
+
+  const expansionOptions = [
+    {
+      code: "ARR",
+      label: "ARR",
+      fullName: "A Realm Reborn",
+      icon: getExpansionIcon("ARR"),
+    },
+    {
+      code: "HW",
+      label: "HW",
+      fullName: "Heavensward",
+      icon: getExpansionIcon("HW"),
+    },
+    {
+      code: "SB",
+      label: "SB",
+      fullName: "Stormblood",
+      icon: getExpansionIcon("SB"),
+    },
+    {
+      code: "SHB",
+      label: "SHB",
+      fullName: "Shadowbringers",
+      icon: getExpansionIcon("SHB"),
+    },
+    {
+      code: "EW",
+      label: "EW",
+      fullName: "Endwalker",
+      icon: getExpansionIcon("EW"),
+    },
+    {
+      code: "DT",
+      label: "DT",
+      fullName: "Dawntrail",
+      icon: getExpansionIcon("DT"),
+    },
+  ]
+
   const filteredMounts = mounts.filter((mount) => {
     const mountType =
       mount.sources?.[0]?.type || "Unknown"
@@ -78,56 +140,69 @@ function App() {
           <h2>Filters</h2>
 
           <div className="filter-group">
-            <h3>Type</h3>
-            <div className="type-filters">
+            <div className="filter-heading">
+              <h3>Type</h3>
               <button
-                className={selectedTypes.length === 0 ? "filter-button type-button active" : "filter-button type-button"}
-                onClick={() => setSelectedTypes([])}>
-                <img src="/icons/all.png" alt="All types" />
+                className={selectedTypes.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
+                onClick={() => setSelectedTypes([])}
+              >
+                <img src="/icons/all.png" alt="" aria-hidden="true" />
+                <span>Reset</span>
               </button>
+            </div>
+            <div className="type-filters">
+              {typeGroups.map((group) => (
+                <div key={group.label} className="type-category">
+                  <p className="type-category-title">{group.label}</p>
 
-              {Object.entries(sourceIcons).map(([type, icon]) => (
-                <button
-                  key={type}
-                  className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
-                  onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
-                >
-                  <img src={icon} alt={type} />
-                </button>
+                  <div className="type-category-buttons">
+                    {group.types.map((type) => {
+                      return (
+                        <button
+                          key={type}
+                          className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
+                          onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
+                        >
+                          <img src={sourceIcons[type]} alt={type} />
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
 
           <div className="filter-group">
-            <h3>Expansion</h3>
-            <div className="expansion-filters">
+            <div className="filter-heading">
+              <h3>Expansion</h3>
               <button
-                className={
-                  selectedExpansions.length === 0
-                    ? "filter-button expansion-button active"
-                    : "filter-button expansion-button"
-                }
+                className={selectedExpansions.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
                 onClick={() => setSelectedExpansions([])}
               >
-                <img src="/icons/all.png" alt="All expansions" />
+                <img src="/icons/all.png" alt="" aria-hidden="true" />
+                <span>Reset</span>
               </button>
-
-              {["ARR", "HW", "SB", "SHB", "EW", "DT"].map((expansion) => (
+            </div>
+            <div className="expansion-filters">
+              {expansionOptions.map((expansion) => (
                 <button
-                  key={expansion}
+                  key={expansion.code}
                   className={
-                    selectedExpansions.includes(expansion)
-                      ? "filter-button expansion-button active"
-                      : "filter-button expansion-button"
+                    selectedExpansions.includes(expansion.code)
+                        ? "filter-button expansion-button expansion-card active"
+                        : "filter-button expansion-button expansion-card"
                   }
+                  title={expansion.fullName}
                   onClick={() =>
-                    toggleSelection(expansion, selectedExpansions, setSelectedExpansions)
+                    toggleSelection(expansion.code, selectedExpansions, setSelectedExpansions)
                   }
                 >
                   <img
-                    src={getExpansionIcon(expansion)}
-                    alt={expansion}
+                    src={expansion.icon}
+                    alt={expansion.fullName}
                   />
+                  <span className="expansion-label">{expansion.label}</span>
                 </button>
               ))}
             </div>
