@@ -83,7 +83,7 @@ function App() {
               <button
                 className={selectedTypes.length === 0 ? "filter-button type-button active" : "filter-button type-button"}
                 onClick={() => setSelectedTypes([])}>
-                All
+                <img src="/icons/all.png" alt="All types" />
               </button>
 
               {Object.entries(sourceIcons).map(([type, icon]) => (
@@ -109,7 +109,7 @@ function App() {
                 }
                 onClick={() => setSelectedExpansions([])}
               >
-                All
+                <img src="/icons/all.png" alt="All expansions" />
               </button>
 
               {["ARR", "HW", "SB", "SHB", "EW", "DT"].map((expansion) => (
