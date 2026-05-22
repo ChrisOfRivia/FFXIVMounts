@@ -66,11 +66,28 @@ body {
   transform: translateY(-1px);
 }
 
+.page-shell {
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 28px;
+  padding: 8px 0 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.page-header h1 {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
+}
+
 .app-shell {
   display: flex;
   align-items: flex-start;
   gap: 32px;
-  padding: 24px;
 }
 
 .filters-sidebar {
@@ -171,12 +188,6 @@ body {
 .content-area {
   flex: 1;
   min-width: 0;
-}
-
-.content-area h1 {
-  margin-top: 0;
-  margin-bottom: 24px;
-  text-align: center;
 }
 
 .type-filters {
@@ -451,6 +462,10 @@ body {
 }
 
 @media (max-width: 900px) {
+  .page-header {
+    margin-bottom: 24px;
+  }
+
   .app-shell {
     flex-direction: column;
   }

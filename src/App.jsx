@@ -162,126 +162,131 @@ function App() {
         </div>
       ) : null}
 
-      <div className="app-shell">
-        <aside className="filters-sidebar">
-          <div className="filters-panel">
-            <h2>Filters</h2>
-
-            <div className="search-filter">
-              <input
-                type="search"
-                className="search-input"
-                placeholder="Search mounts..."
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                aria-label="Search mounts"
-              />
-            </div>
-
-            <div className="filter-group">
-              <div className="filter-heading">
-                <h3>Type</h3>
-                <button
-                  className={selectedTypes.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
-                  onClick={() => setSelectedTypes([])}
-                >
-                  <img src="/icons/all.png" alt="" aria-hidden="true" />
-                  <span>Reset</span>
-                </button>
-              </div>
-              <div className="type-filters">
-                {typeGroups.map((group) => (
-                  <div key={group.label} className="type-category">
-                    <p className="type-category-title">{group.label}</p>
-
-                    <div className="type-category-buttons">
-                      {group.types.map((type) => (
-                        <button
-                          key={type}
-                          className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
-                          onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
-                        >
-                          <img src={sourceIcons[type]} alt={type} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <div className="filter-heading">
-                <h3>Expansion</h3>
-                <button
-                  className={selectedExpansions.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
-                  onClick={() => setSelectedExpansions([])}
-                >
-                  <img src="/icons/all.png" alt="" aria-hidden="true" />
-                  <span>Reset</span>
-                </button>
-              </div>
-              <div className="expansion-filters">
-                {expansionOptions.map((expansion) => (
-                  <button
-                    key={expansion.code}
-                    className={
-                      selectedExpansions.includes(expansion.code)
-                        ? "filter-button expansion-button expansion-card active"
-                        : "filter-button expansion-button expansion-card"
-                    }
-                    title={expansion.fullName}
-                    onClick={() =>
-                      toggleSelection(expansion.code, selectedExpansions, setSelectedExpansions)
-                    }
-                  >
-                    <img
-                      src={expansion.icon}
-                      alt={expansion.fullName}
-                    />
-                    <span className="expansion-label">{expansion.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <main className="content-area">
+      <div className="page-shell">
+        <header className="page-header">
           <h1>FFXIV Mount Tracker</h1>
-          <div className="mount-grid">
-            {filteredMounts.map((mount) => (
-              <div key={mount.id} className="mount-card">
-                <div className="mount-patch">
-                  <img
-                    src={
-                      getExpansionIcon(
-                        getExpansion(mount.patch)
-                      )
-                    }
-                  />
-                </div>
-                <h2>{mount.name}</h2>
-                <div className="mount-image">
-                  <img src={mount.image} />
-                </div>
-                <div className="mount-owned">
-                  <h4>Owned by: {mount.owned}</h4>
-                </div>
+        </header>
 
-                <div className="source-mount">
-                  <img
-                    src={
-                      sourceIcons[mount.sources?.[0]?.type] ||
-                      "/icons/unknown.png"
-                    }
-                  />
-                  <p className="source-text"> {mount.sources?.[0]?.text || "Unknown source"}  </p>
+        <div className="app-shell">
+          <aside className="filters-sidebar">
+            <div className="filters-panel">
+              <h2>Filters</h2>
+
+              <div className="search-filter">
+                <input
+                  type="search"
+                  className="search-input"
+                  placeholder="Search mounts..."
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  aria-label="Search mounts"
+                />
+              </div>
+
+              <div className="filter-group">
+                <div className="filter-heading">
+                  <h3>Type</h3>
+                  <button
+                    className={selectedTypes.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
+                    onClick={() => setSelectedTypes([])}
+                  >
+                    <img src="/icons/all.png" alt="" aria-hidden="true" />
+                    <span>Reset</span>
+                  </button>
+                </div>
+                <div className="type-filters">
+                  {typeGroups.map((group) => (
+                    <div key={group.label} className="type-category">
+                      <p className="type-category-title">{group.label}</p>
+
+                      <div className="type-category-buttons">
+                        {group.types.map((type) => (
+                          <button
+                            key={type}
+                            className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
+                            onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
+                          >
+                            <img src={sourceIcons[type]} alt={type} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </main>
+
+              <div className="filter-group">
+                <div className="filter-heading">
+                  <h3>Expansion</h3>
+                  <button
+                    className={selectedExpansions.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
+                    onClick={() => setSelectedExpansions([])}
+                  >
+                    <img src="/icons/all.png" alt="" aria-hidden="true" />
+                    <span>Reset</span>
+                  </button>
+                </div>
+                <div className="expansion-filters">
+                  {expansionOptions.map((expansion) => (
+                    <button
+                      key={expansion.code}
+                      className={
+                        selectedExpansions.includes(expansion.code)
+                          ? "filter-button expansion-button expansion-card active"
+                          : "filter-button expansion-button expansion-card"
+                      }
+                      title={expansion.fullName}
+                      onClick={() =>
+                        toggleSelection(expansion.code, selectedExpansions, setSelectedExpansions)
+                      }
+                    >
+                      <img
+                        src={expansion.icon}
+                        alt={expansion.fullName}
+                      />
+                      <span className="expansion-label">{expansion.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <main className="content-area">
+            <div className="mount-grid">
+              {filteredMounts.map((mount) => (
+                <div key={mount.id} className="mount-card">
+                  <div className="mount-patch">
+                    <img
+                      src={
+                        getExpansionIcon(
+                          getExpansion(mount.patch)
+                        )
+                      }
+                    />
+                  </div>
+                  <h2>{mount.name}</h2>
+                  <div className="mount-image">
+                    <img src={mount.image} />
+                  </div>
+                  <div className="mount-owned">
+                    <h4>Owned by: {mount.owned}</h4>
+                  </div>
+
+                  <div className="source-mount">
+                    <img
+                      src={
+                        sourceIcons[mount.sources?.[0]?.type] ||
+                        "/icons/unknown.png"
+                      }
+                    />
+                    <p className="source-text"> {mount.sources?.[0]?.text || "Unknown source"}  </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
+        </div>
       </div>
     </>
   )
