@@ -93,6 +93,10 @@ const INSTANCE_TYPES = new Set([
 
 const MOGSTATION_SOURCE_TEXT = "Online Store"
 
+const WIKI_TITLE_OVERRIDES = {
+  "The Palace of the Dead": "Palace of the Dead",
+}
+
 const GARLAND_CURRENCY_NAME_OVERRIDES = {
   "Achievement Certificates": "Achievement Certificate",
   "Ananta Dreamstaves": "Ananta Dreamstave",
@@ -101,7 +105,7 @@ const GARLAND_CURRENCY_NAME_OVERRIDES = {
   "Bottles Of Exciting Tonic": "Bottle Of Exciting Tonic",
   "Burning Horns": "Burning Horn",
   "Chi Bolts": "Chi Bolt",
-  "Chunks of Sanguinite": "Chunk of Sanguinite",
+  "Chunks of Sanguinite": "Sanguinite",
   "Clan Mark Logs": "Clan Mark Log",
   "Corvosi Manuscripts": "Corvosi Manuscript",
   Cosmocredits: "Cosmocredit",
@@ -122,7 +126,7 @@ const GARLAND_CURRENCY_NAME_OVERRIDES = {
   "Orange Gatherer's Scrips": "Orange Gatherer's Scrip",
   "Omicron Omnitokens": "Omicron Omnitoken",
   "Phaenna Token Booklets": "Phaenna Token Booklet",
-  "Pieces of Corvosi Brass": "Piece of Corvosi Brass",
+  "Pieces of Corvosi Brass": "Corvosi Brass",
   "Resplendent Feathers": "Resplendent Feather",
   "Sacks of Nuts": "Sack of Nuts",
   "Sacks Of Nuts": "Sack Of Nuts",
@@ -634,11 +638,63 @@ function getWikiTitle(source) {
     return null
   }
 
+  const normalizedWikiTitle = getNormalizedWikiTitle(sourceText)
+
+  if (normalizedWikiTitle) {
+    return normalizedWikiTitle
+  }
+
   return sourceText
 }
 
 function encodeWikiPageTitle(title) {
   return encodeURIComponent(title.replace(/\s+/g, "_"))
+}
+
+function getNormalizedWikiTitle(sourceText) {
+  const directTitle = getDirectWikiTitle(sourceText)
+
+  if (directTitle) {
+    return directTitle
+  }
+
+  const instanceContainerTitle = getInstanceContainerWikiTitle(sourceText)
+
+  if (instanceContainerTitle) {
+    return instanceContainerTitle
+  }
+
+  const lockboxZoneTitle = getLockboxZoneWikiTitle(sourceText)
+
+  if (lockboxZoneTitle) {
+    return lockboxZoneTitle
+  }
+
+  return null
+}
+
+function getDirectWikiTitle(sourceText) {
+  return WIKI_TITLE_OVERRIDES[sourceText] || null
+}
+
+function getInstanceContainerWikiTitle(sourceText) {
+  const containerSourceMatch = sourceText.match(/^(.+?) - (Final Boss Chest(?:es)?|Bronze(?:\/Silver)? Coffer|Silver Coffer|Gold Sack|Silver Sack|Platinum Sack|Sack of First Light)$/)
+
+  if (!containerSourceMatch) {
+    return null
+  }
+
+  return WIKI_TITLE_OVERRIDES[containerSourceMatch[1]] || containerSourceMatch[1]
+}
+
+function getLockboxZoneWikiTitle(sourceText) {
+  const happyBunnyLockboxMatch = sourceText.match(/^Happy Bunny Lockbox - (.+)$/)
+
+  if (!happyBunnyLockboxMatch) {
+    return null
+  }
+
+  return happyBunnyLockboxMatch[1]
 }
 
 function isMogstationSource(source) {
