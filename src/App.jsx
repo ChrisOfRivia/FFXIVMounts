@@ -1,11 +1,103 @@
 import { useEffect, useState } from "react"
 
+const SOURCE_ICONS = {
+  Unknown: "/icons/unknown.png",
+  Trial: "/icons/trial.png",
+  Achievement: "/icons/achievement.png",
+  Event: "/icons/seasonal.png",
+  Quest: "/icons/msq.png",
+  "Wondrous Tails": "/icons/trails.png",
+  Premium: "/icons/store.png",
+  "V&C Dungeon": "/icons/trissant.png",
+  "Cosmic Exploration": "/icons/cosmocredit.png",
+  Raid: "/icons/raid.png",
+  PvP: "/icons/pvp.png",
+  "Deep Dungeon": "/icons/deepdungeon.png",
+  Tribal: "/icons/tribal.png",
+  "Treasure Hunt": "/icons/treasure.png",
+  "Occult Crescent": "/icons/crescent.png",
+  "Chaotic Raid": "/icons/chaotic.png",
+  Hunts: "/icons/hunt.png",
+  Gathering: "/icons/gather.png",
+  FATE: "/icons/fate.png",
+  Purchase: "/icons/purchase.png",
+  "Island Sanctuary": "/icons/sanctuary.png",
+  "Gold Saucer": "/icons/saucer.png",
+  Skybuilders: "/icons/deliveries.png",
+  Bozja: "/icons/bozja.png",
+  Crafting: "/icons/crafting.png",
+  Eureka: "/icons/lockbox.png",
+  Dungeon: "/icons/dungeon.png",
+  Voyages: "/icons/voyages.png",
+  Other: "/icons/special.png",
+}
+
+const TYPE_GROUPS = [
+  {
+    label: "Instances",
+    types: ["Dungeon", "Trial", "Raid", "Chaotic Raid", "Deep Dungeon", "V&C Dungeon"],
+  },
+  {
+    label: "Exploration",
+    types: ["Eureka", "Bozja", "Occult Crescent", "Treasure Hunt", "Voyages"],
+  },
+  {
+    label: "Progression",
+    types: ["Quest", "Achievement", "Hunts", "FATE", "Wondrous Tails"],
+  },
+  {
+    label: "Side Content",
+    types: ["Tribal", "Island Sanctuary", "Gold Saucer", "Skybuilders", "Gathering", "Crafting"],
+  },
+  {
+    label: "Special",
+    types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "Other", "Unknown"],
+  },
+]
+
+const EXPANSION_NAMES = {
+  ARR: "A Realm Reborn",
+  HW: "Heavensward",
+  SB: "Stormblood",
+  SHB: "Shadowbringers",
+  EW: "Endwalker",
+  DT: "Dawntrail",
+}
+
+const EXPANSION_OPTIONS = Object.entries(EXPANSION_NAMES).map(([code, fullName]) => ({
+  code,
+  label: code,
+  fullName,
+  icon: getExpansionIcon(code),
+}))
+
+const GARLAND_TYPE_MAP = {
+  Achievement: "achievement",
+  Fate: "fate",
+  FATE: "fate",
+  Item: "item",
+  Leve: "leve",
+  Mob: "mob",
+  NPC: "npc",
+  Quest: "quest",
+}
+
+const INSTANCE_TYPES = new Set([
+  "Trial",
+  "Raid",
+  "Dungeon",
+  "Deep Dungeon",
+  "Chaotic Raid",
+  "V&C Dungeon",
+])
+
 function App() {
   const [mounts, setMounts] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedExpansions, setSelectedExpansions] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
   const [showProjectNotice, setShowProjectNotice] = useState(true)
+  const [selectedMount, setSelectedMount] = useState(null)
 
   useEffect(() => {
     fetch("https://ffxivcollect.com/api/mounts")
@@ -16,115 +108,35 @@ function App() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = showProjectNotice ? "hidden" : ""
+    document.body.style.overflow = showProjectNotice || selectedMount ? "hidden" : ""
 
     return () => {
       document.body.style.overflow = ""
     }
-  }, [showProjectNotice])
+  }, [showProjectNotice, selectedMount])
 
-  const sourceIcons = {
-    "Unknown": "/icons/unknown.png",
-    "Trial": "/icons/trial.png",
-    "Achievement": "/icons/achievement.png",
-    "Event": "/icons/seasonal.png",
-    "Quest": "/icons/msq.png",
-    "Wondrous Tails": "/icons/trails.png",
-    "Premium": "/icons/store.png",
-    "V\u0026C Dungeon": "/icons/trissant.png",
-    "Cosmic Exploration": "/icons/cosmocredit.png",
-    "Raid": "/icons/raid.png",
-    "PvP": "/icons/pvp.png",
-    "Deep Dungeon": "/icons/deepdungeon.png",
-    "Tribal": "/icons/tribal.png",
-    "Treasure Hunt": "/icons/treasure.png",
-    "Occult Crescent": "/icons/crescent.png",
-    "Chaotic Raid": "/icons/chaotic.png",
-    "Hunts": "/icons/hunt.png",
-    "Gathering": "/icons/gather.png",
-    "FATE": "/icons/fate.png",
-    "Purchase": "/icons/purchase.png",
-    "Island Sanctuary": "/icons/sanctuary.png",
-    "Gold Saucer": "/icons/saucer.png",
-    "Skybuilders": "/icons/deliveries.png",
-    "Bozja": "/icons/bozja.png",
-    "Crafting": "/icons/crafting.png",
-    "Eureka": "/icons/lockbox.png",
-    "Dungeon": "/icons/dungeon.png",
-    "Voyages": "/icons/voyages.png",
-    "Other": "/icons/special.png",
-  }
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setSelectedMount(null)
+      }
+    }
 
-  const typeGroups = [
-    {
-      label: "Instances",
-      types: ["Dungeon", "Trial", "Raid", "Chaotic Raid", "Deep Dungeon", "V&C Dungeon"],
-    },
-    {
-      label: "Exploration",
-      types: ["Eureka", "Bozja", "Occult Crescent", "Treasure Hunt", "Voyages"],
-    },
-    {
-      label: "Progression",
-      types: ["Quest", "Achievement", "Hunts", "FATE", "Wondrous Tails"],
-    },
-    {
-      label: "Side Content",
-      types: ["Tribal", "Island Sanctuary", "Gold Saucer", "Skybuilders", "Gathering", "Crafting"],
-    },
-    {
-      label: "Special",
-      types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "Other", "Unknown"],
-    },
-  ]
+    window.addEventListener("keydown", handleKeyDown)
 
-  const expansionOptions = [
-    {
-      code: "ARR",
-      label: "ARR",
-      fullName: "A Realm Reborn",
-      icon: getExpansionIcon("ARR"),
-    },
-    {
-      code: "HW",
-      label: "HW",
-      fullName: "Heavensward",
-      icon: getExpansionIcon("HW"),
-    },
-    {
-      code: "SB",
-      label: "SB",
-      fullName: "Stormblood",
-      icon: getExpansionIcon("SB"),
-    },
-    {
-      code: "SHB",
-      label: "SHB",
-      fullName: "Shadowbringers",
-      icon: getExpansionIcon("SHB"),
-    },
-    {
-      code: "EW",
-      label: "EW",
-      fullName: "Endwalker",
-      icon: getExpansionIcon("EW"),
-    },
-    {
-      code: "DT",
-      label: "DT",
-      fullName: "Dawntrail",
-      icon: getExpansionIcon("DT"),
-    },
-  ]
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [])
 
   const filteredMounts = mounts.filter((mount) => {
-    const mountType = mount.sources?.[0]?.type || "Unknown"
+    const mountType = getPrimarySource(mount).type
     const expansion = getExpansion(mount.patch)
     const normalizedQuery = searchQuery.trim().toLowerCase()
     const matchesSearch =
       normalizedQuery === "" ||
       mount.name.toLowerCase().includes(normalizedQuery) ||
-      (mount.sources?.[0]?.text || "").toLowerCase().includes(normalizedQuery)
+      getPrimarySource(mount).text.toLowerCase().includes(normalizedQuery)
 
     const matchesType = selectedTypes.length === 0 || selectedTypes.includes(mountType)
     const matchesExpansion = selectedExpansions.length === 0 || selectedExpansions.includes(expansion)
@@ -141,6 +153,12 @@ function App() {
     setSelectedValues([...selectedValues, value])
   }
 
+  function openMountDetails(mount) {
+    setSelectedMount(mount)
+  }
+
+  const selectedMountExpansion = selectedMount ? getExpansion(selectedMount.patch) : null
+  const selectedMountSourceType = selectedMount ? getPrimarySource(selectedMount).type : "Unknown"
 
   return (
     <>
@@ -158,6 +176,128 @@ function App() {
             >
               Continue
             </button>
+          </div>
+        </div>
+      ) : null}
+
+      {selectedMount ? (
+        <div
+          className="mount-detail-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mount-detail-title"
+          onClick={() => setSelectedMount(null)}
+        >
+          <div className="mount-detail-card" onClick={(event) => event.stopPropagation()}>
+            <button
+              className="mount-detail-close"
+              onClick={() => setSelectedMount(null)}
+              aria-label="Close mount details"
+            >
+              X
+            </button>
+
+            <div className="mount-detail-header">
+              <div className="mount-detail-badges">
+                <span className="mount-detail-badge mount-detail-expansion-badge">
+                  <img
+                    src={getExpansionIcon(selectedMountExpansion)}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <span>{getExpansionName(selectedMountExpansion)}</span>
+                </span>
+                <span className="mount-detail-badge mount-detail-type-badge">
+                  <img
+                    src={SOURCE_ICONS[selectedMountSourceType] || "/icons/unknown.png"}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <span>{selectedMountSourceType}</span>
+                </span>
+              </div>
+
+              <div className="mount-detail-title-row">
+                <div className="mount-detail-icon">
+                  <img src={selectedMount.icon || selectedMount.image} alt="" aria-hidden="true" />
+                </div>
+
+                <div className="mount-detail-title-group">
+                  <h2 id="mount-detail-title">{selectedMount.name}</h2>
+                  <p className="mount-detail-subtitle">
+                    Patch {selectedMount.patch || "Unknown"}
+                  </p>
+                  {selectedMount.description ? (
+                    <p className="mount-detail-description">{selectedMount.description}</p>
+                  ) : null}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="mount-detail-body">
+              <div className="mount-detail-image">
+                <img src={selectedMount.image} alt={selectedMount.name} />
+              </div>
+
+              <div className="mount-detail-info">
+                <div className="mount-detail-owned">
+                  Owned by: <strong>{selectedMount.owned}</strong>
+                </div>
+
+                <div className="mount-detail-section">
+                  <h3>How to Get It</h3>
+
+                  <div className="mount-detail-sources">
+                    {getSourceList(selectedMount).map((source, index) => {
+                      const sourceLinks = getSourceLinks(source, selectedMount)
+                      const primarySourceLink = getPrimarySourceLink(sourceLinks)
+
+                      return (
+                        <div key={`${selectedMount.id}-${source.type}-${index}`} className="mount-detail-source">
+                          <div className="mount-detail-source-header">
+                            <img
+                              src={SOURCE_ICONS[source.type] || "/icons/unknown.png"}
+                              alt={source.type}
+                            />
+                            <span>{source.type}</span>
+                          </div>
+
+                          {primarySourceLink ? (
+                            <a
+                              className="mount-detail-source-copy mount-detail-source-copy-link"
+                              href={primarySourceLink.href}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {source.text}
+                            </a>
+                          ) : (
+                            <p className="mount-detail-source-copy">{source.text}</p>
+                          )}
+
+                          {sourceLinks.length > 0 ? (
+                            <div className="mount-detail-source-links">
+                              {sourceLinks.map((link) => (
+                                <a
+                                  key={`${selectedMount.id}-${source.type}-${link.label}-${link.href}`}
+                                  className="mount-detail-source-pill"
+                                  href={link.href}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {link.label}
+                                </a>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}
@@ -195,7 +335,7 @@ function App() {
                   </button>
                 </div>
                 <div className="type-filters">
-                  {typeGroups.map((group) => (
+                  {TYPE_GROUPS.map((group) => (
                     <div key={group.label} className="type-category">
                       <p className="type-category-title">{group.label}</p>
 
@@ -206,7 +346,7 @@ function App() {
                             className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
                             onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
                           >
-                            <img src={sourceIcons[type]} alt={type} />
+                            <img src={SOURCE_ICONS[type]} alt={type} />
                           </button>
                         ))}
                       </div>
@@ -227,7 +367,7 @@ function App() {
                   </button>
                 </div>
                 <div className="expansion-filters">
-                  {expansionOptions.map((expansion) => (
+                  {EXPANSION_OPTIONS.map((expansion) => (
                     <button
                       key={expansion.code}
                       className={
@@ -255,7 +395,19 @@ function App() {
           <main className="content-area">
             <div className="mount-grid">
               {filteredMounts.map((mount) => (
-                <div key={mount.id} className="mount-card">
+                <div
+                  key={mount.id}
+                  className="mount-card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openMountDetails(mount)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault()
+                      openMountDetails(mount)
+                    }
+                  }}
+                >
                   <div className="mount-patch">
                     <img
                       src={
@@ -276,11 +428,11 @@ function App() {
                   <div className="source-mount">
                     <img
                       src={
-                        sourceIcons[mount.sources?.[0]?.type] ||
+                        SOURCE_ICONS[getPrimarySource(mount).type] ||
                         "/icons/unknown.png"
                       }
                     />
-                    <p className="source-text"> {mount.sources?.[0]?.text || "Unknown source"}  </p>
+                    <p className="source-text">{getPrimarySource(mount).text}</p>
                   </div>
                 </div>
               ))}
@@ -292,33 +444,139 @@ function App() {
   )
 }
 
+function getPrimarySource(mount) {
+  return getSourceList(mount)[0]
+}
+
+function getSourceList(mount) {
+  if (mount?.sources?.length) {
+    return mount.sources.map((source) => ({
+      ...source,
+      type: source.type || "Unknown",
+      text: source.text || "Unknown source",
+    }))
+  }
+
+  return [{ type: "Unknown", text: "Unknown source" }]
+}
+
 function getExpansionIcon(expansion) {
   if (expansion === "ARR") {
-    return "/expansions/ARR.png";
+    return "/expansions/ARR.png"
   }
 
   if (expansion === "HW") {
-    return "/expansions/HW.webp";
+    return "/expansions/HW.webp"
   }
 
   if (expansion === "SB") {
-    return "/expansions/SB.webp";
+    return "/expansions/SB.webp"
   }
 
   if (expansion === "SHB") {
-    return "/expansions/SHB.webp";
+    return "/expansions/SHB.webp"
   }
 
   if (expansion === "EW") {
-    return "/expansions/EW.png";
+    return "/expansions/EW.png"
   }
 
   if (expansion === "DT") {
-    return "/expansions/DT.webp";
+    return "/expansions/DT.webp"
   }
 
-  return "/icons/unknown.png";
+  return "/icons/unknown.png"
 }
+
+function getExpansionName(expansion) {
+  return EXPANSION_NAMES[expansion] || "Unknown Expansion"
+}
+
+function getSourceLinks(source, mount) {
+  const linkBuilders = getSourceLinkPriority(source)
+  const links = linkBuilders.map((builder) => builder(source, mount)).filter(Boolean)
+
+  return links.filter((link, index) => links.findIndex((entry) => entry.href === link.href) === index)
+}
+
+function getPrimarySourceLink(sourceLinks) {
+  return sourceLinks[0] || null
+}
+
+function getCollectSourceLink(source) {
+  if (source.related_type === "Achievement" && source.related_id) {
+    return {
+      label: "FFXIV Collect",
+      href: `https://ffxivcollect.com/achievements/${source.related_id}`,
+    }
+  }
+
+  return null
+}
+
+function getMogstationSourceLink(source) {
+  if (source.type !== "Premium") {
+    return null
+  }
+
+  return {
+    label: "Mog Station",
+    href: "https://store.finalfantasyxiv.com/ffxivstore/en-us/category/11",
+  }
+}
+
+function getGarlandSourceLink(source) {
+  const garlandType = GARLAND_TYPE_MAP[source.related_type]
+
+  if (!garlandType || !source.related_id) {
+    return null
+  }
+
+  return {
+    label: "Garland DB",
+    href: `https://www.garlandtools.org/db/#${garlandType}/${source.related_id}`,
+  }
+}
+
+function getWikiSourceLink(source) {
+  const wikiTitle = getWikiTitle(source)
+
+  if (!wikiTitle) {
+    return null
+  }
+
+  return {
+    label: "FFXIV Wiki",
+    href: `https://ffxiv.consolegameswiki.com/wiki/${encodeWikiPageTitle(wikiTitle)}`,
+  }
+}
+
+function getSourceLinkPriority(source) {
+  if (source.type === "Premium") {
+    return [getWikiSourceLink, getMogstationSourceLink]
+  }
+
+  if (INSTANCE_TYPES.has(source.type)) {
+    return [getWikiSourceLink]
+  }
+
+  return [getCollectSourceLink, getGarlandSourceLink, getWikiSourceLink]
+}
+
+function getWikiTitle(source) {
+  const sourceText = source.text?.trim()
+
+  if (!sourceText || sourceText === "Unknown source") {
+    return null
+  }
+
+  return sourceText
+}
+
+function encodeWikiPageTitle(title) {
+  return encodeURIComponent(title.replace(/\s+/g, "_"))
+}
+
 function getExpansion(patch) {
   const patchNumber = parseFloat(patch)
 
