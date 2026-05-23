@@ -91,6 +91,53 @@ const INSTANCE_TYPES = new Set([
   "V&C Dungeon",
 ])
 
+const MOGSTATION_SOURCE_TEXT = "Online Store"
+
+const GARLAND_CURRENCY_NAME_OVERRIDES = {
+  "Achievement Certificates": "Achievement Certificate",
+  "Ananta Dreamstaves": "Ananta Dreamstave",
+  "Bicolor Gemstone Vouchers": "Bicolor Gemstone Voucher",
+  "Bozjan Clusters": "Bozjan Cluster",
+  "Bottles Of Exciting Tonic": "Bottle Of Exciting Tonic",
+  "Burning Horns": "Burning Horn",
+  "Chi Bolts": "Chi Bolt",
+  "Chunks of Sanguinite": "Chunk of Sanguinite",
+  "Clan Mark Logs": "Clan Mark Log",
+  "Corvosi Manuscripts": "Corvosi Manuscript",
+  Cosmocredits: "Cosmocredit",
+  "Enlightenment Silver Pieces": "Enlightenment Silver Piece",
+  "Fae Fancies": "Fae Fancy",
+  "First Light Relics": "First Light Relic",
+  "Formidable Cog": "Formidable Cog",
+  "Faux Leaves": "Faux Leaf",
+  "Fete Tokens": "Fete Token",
+  "Gelmorran Potsherds": "Gelmorran Potsherd",
+  "Gil": "Gil",
+  "Gold Chocobo Feathers": "Gold Chocobo Feather",
+  "Guardian Arkveld Certificates": "Guardian Arkveld Certificate",
+  "Hammered Frogments": "Hammered Frogment",
+  "Ixion Horns": "Ixion Horn",
+  "Mount Tokens": "Mount Token",
+  "Oizys Token Booklets": "Oizys Token Booklet",
+  "Orange Gatherer's Scrips": "Orange Gatherer's Scrip",
+  "Omicron Omnitokens": "Omicron Omnitoken",
+  "Phaenna Token Booklets": "Phaenna Token Booklet",
+  "Pieces of Corvosi Brass": "Piece of Corvosi Brass",
+  "Resplendent Feathers": "Resplendent Feather",
+  "Sacks of Nuts": "Sack of Nuts",
+  "Sacks Of Nuts": "Sack Of Nuts",
+  "Seafarer's Cowries": "Seafarer's Cowrie",
+  "Shishu Coins": "Shishu Coin",
+  "Sil'dihn Silvers": "Sil'dihn Silver",
+  "Skybuilders' Scrips": "Skybuilders' Scrip",
+  "Trophy Crystals": "Trophy Crystal",
+  "Turali Bicolor Gemstone Vouchers": "Turali Bicolor Gemstone Voucher",
+  "Ttokrrone Scales": "Ttokrrone Scale",
+  "Twilight Gemstones": "Twilight Gemstone",
+  "Vegetal Vouchers": "Vegetal Voucher",
+  "Wolf Marks": "Wolf Mark",
+}
+
 function App() {
   const [mounts, setMounts] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
@@ -503,6 +550,19 @@ function getPrimarySourceLink(sourceLinks) {
   return sourceLinks[0] || null
 }
 
+function getCurrencySourceLink(source) {
+  const garlandCurrencyName = getGarlandCurrencyName(source)
+
+  if (!garlandCurrencyName) {
+    return null
+  }
+
+  return {
+    label: "Garland DB",
+    href: `https://www.garlandtools.org/db/#search/${encodeURIComponent(garlandCurrencyName)}`,
+  }
+}
+
 function getCollectSourceLink(source) {
   if (source.related_type === "Achievement" && source.related_id) {
     return {
@@ -515,7 +575,7 @@ function getCollectSourceLink(source) {
 }
 
 function getMogstationSourceLink(source) {
-  if (source.type !== "Premium") {
+  if (!isMogstationSource(source)) {
     return null
   }
 
@@ -552,8 +612,12 @@ function getWikiSourceLink(source) {
 }
 
 function getSourceLinkPriority(source) {
-  if (source.type === "Premium") {
-    return [getWikiSourceLink, getMogstationSourceLink]
+  if (isMogstationSource(source)) {
+    return [getMogstationSourceLink]
+  }
+
+  if (getGarlandCurrencyName(source)) {
+    return [getCurrencySourceLink]
   }
 
   if (INSTANCE_TYPES.has(source.type)) {
@@ -575,6 +639,83 @@ function getWikiTitle(source) {
 
 function encodeWikiPageTitle(title) {
   return encodeURIComponent(title.replace(/\s+/g, "_"))
+}
+
+function isMogstationSource(source) {
+  return source.type === "Premium" && source.text?.trim() === MOGSTATION_SOURCE_TEXT
+}
+
+function getGarlandCurrencyName(source) {
+  const sourceText = source.text?.trim()
+
+  if (!sourceText || sourceText === "Unknown source") {
+    return null
+  }
+
+  const directAmountMatch = sourceText.match(/^\d[\d,]*\s+(.+?)(?:\s*\(|$)/)
+
+  if (directAmountMatch) {
+    return normalizeGarlandCurrencyName(directAmountMatch[1])
+  }
+
+  const vendorAmountMatch = sourceText.match(/ - \d[\d,]*\s+(.+?)(?:\s*\(|$)/)
+
+  if (vendorAmountMatch) {
+    return normalizeGarlandCurrencyName(vendorAmountMatch[1])
+  }
+
+  return null
+}
+
+function normalizeGarlandCurrencyName(currencyName) {
+  const trimmedCurrencyName = currencyName.trim()
+  const normalizedCurrencyName = normalizeGarlandCurrencyLookupKey(trimmedCurrencyName)
+
+  if (!trimmedCurrencyName) {
+    return null
+  }
+
+  if (GARLAND_CURRENCY_NAME_OVERRIDES[normalizedCurrencyName]) {
+    return GARLAND_CURRENCY_NAME_OVERRIDES[normalizedCurrencyName]
+  }
+
+  return singularizeGarlandCurrencyName(trimmedCurrencyName)
+}
+
+function normalizeGarlandCurrencyLookupKey(currencyName) {
+  return currencyName.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+}
+
+function singularizeGarlandCurrencyName(currencyName) {
+  const words = currencyName.split(" ")
+
+  for (let index = words.length - 1; index >= 0; index -= 1) {
+    const word = words[index]
+    const singularWord = singularizeGarlandWord(word)
+
+    if (singularWord !== word) {
+      words[index] = singularWord
+      return words.join(" ")
+    }
+  }
+
+  return currencyName
+}
+
+function singularizeGarlandWord(word) {
+  if (word === "Leaves") {
+    return "Leaf"
+  }
+
+  if (word.endsWith("ies")) {
+    return `${word.slice(0, -3)}y`
+  }
+
+  if (word.endsWith("s") && !word.endsWith("ss")) {
+    return word.slice(0, -1)
+  }
+
+  return word
 }
 
 function getExpansion(patch) {
