@@ -554,6 +554,19 @@ function getPrimarySourceLink(sourceLinks) {
   return sourceLinks[0] || null
 }
 
+function getVendorSourceLink(source) {
+  const vendorWikiTitle = getVendorWikiTitle(source)
+
+  if (!vendorWikiTitle) {
+    return null
+  }
+
+  return {
+    label: "Vendor",
+    href: `https://ffxiv.consolegameswiki.com/wiki/${encodeWikiPageTitle(vendorWikiTitle)}`,
+  }
+}
+
 function getCurrencySourceLink(source) {
   const garlandCurrencyName = getGarlandCurrencyName(source)
 
@@ -620,8 +633,12 @@ function getSourceLinkPriority(source) {
     return [getMogstationSourceLink]
   }
 
+  if (isMgpSource(source) || isGilSource(source)) {
+    return [getVendorSourceLink]
+  }
+
   if (getGarlandCurrencyName(source)) {
-    return [getCurrencySourceLink]
+    return [getCurrencySourceLink, getVendorSourceLink]
   }
 
   if (INSTANCE_TYPES.has(source.type)) {
@@ -673,6 +690,40 @@ function getNormalizedWikiTitle(sourceText) {
   return null
 }
 
+function getVendorWikiTitle(source) {
+  const sourceText = source.text?.trim()
+
+  if (!sourceText) {
+    return null
+  }
+
+  if (isMgpSource(source)) {
+    return "Gold Saucer Attendant"
+  }
+
+  const vendorSourceMatch = sourceText.match(/^(.*?) - \d[\d,]*\s+.+$/)
+
+  if (vendorSourceMatch) {
+    return getVendorNameFromSourcePrefix(vendorSourceMatch[1])
+  }
+
+  return null
+}
+
+function getVendorNameFromSourcePrefix(sourcePrefix) {
+  const normalizedSourcePrefix = sourcePrefix.trim()
+
+  if (!normalizedSourcePrefix) {
+    return null
+  }
+
+  const vendorSegment = normalizedSourcePrefix.includes(" / ")
+    ? normalizedSourcePrefix.split(" / ")[0]
+    : normalizedSourcePrefix.split(" - ")[0]
+
+  return vendorSegment.replace(/\s*\([^)]*\)\s*$/, "").trim() || null
+}
+
 function getDirectWikiTitle(sourceText) {
   return WIKI_TITLE_OVERRIDES[sourceText] || null
 }
@@ -699,6 +750,14 @@ function getLockboxZoneWikiTitle(sourceText) {
 
 function isMogstationSource(source) {
   return source.type === "Premium" && source.text?.trim() === MOGSTATION_SOURCE_TEXT
+}
+
+function isMgpSource(source) {
+  return source.type === "Gold Saucer" && source.text?.includes("MGP")
+}
+
+function isGilSource(source) {
+  return source.text?.includes("Gil")
 }
 
 function getGarlandCurrencyName(source) {
