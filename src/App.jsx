@@ -51,7 +51,7 @@ const TYPE_GROUPS = [
   },
   {
     label: "Special",
-    types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "PvP", "Other", "Unknown"],
+    types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "PvP", "Other"],
   },
 ]
 
