@@ -51,7 +51,7 @@ const TYPE_GROUPS = [
   },
   {
     label: "Special",
-    types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "Other", "Unknown"],
+    types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "PvP", "Other", "Unknown"],
   },
 ]
 
@@ -675,6 +675,18 @@ function getNormalizedWikiTitle(sourceText) {
     return directTitle
   }
 
+  const pvpSeriesTitle = getPvpSeriesWikiTitle(sourceText)
+
+  if (pvpSeriesTitle) {
+    return pvpSeriesTitle
+  }
+
+  const feastTitle = getFeastWikiTitle(sourceText)
+
+  if (feastTitle) {
+    return feastTitle
+  }
+
   const instanceContainerTitle = getInstanceContainerWikiTitle(sourceText)
 
   if (instanceContainerTitle) {
@@ -699,6 +711,14 @@ function getVendorWikiTitle(source) {
 
   if (isMgpSource(source)) {
     return "Gold Saucer Attendant"
+  }
+
+  if (isPvpTrophyCrystalSource(source)) {
+    return "Crystal Quartermaster"
+  }
+
+  if (isPvpWolfMarkSource(source)) {
+    return "Mark Quartermaster"
   }
 
   const vendorSourceMatch = sourceText.match(/^(.*?) - \d[\d,]*\s+.+$/)
@@ -726,6 +746,22 @@ function getVendorNameFromSourcePrefix(sourcePrefix) {
 
 function getDirectWikiTitle(sourceText) {
   return WIKI_TITLE_OVERRIDES[sourceText] || null
+}
+
+function getPvpSeriesWikiTitle(sourceText) {
+  if (!/^PvP Series \d+ - Level \d+$/.test(sourceText)) {
+    return null
+  }
+
+  return "Series Malmstones"
+}
+
+function getFeastWikiTitle(sourceText) {
+  if (!/^The Feast: Season \d+$/.test(sourceText)) {
+    return null
+  }
+
+  return "The Feast"
 }
 
 function getInstanceContainerWikiTitle(sourceText) {
@@ -758,6 +794,14 @@ function isMgpSource(source) {
 
 function isGilSource(source) {
   return source.text?.includes("Gil")
+}
+
+function isPvpTrophyCrystalSource(source) {
+  return source.type === "PvP" && source.text?.includes("Trophy Crystals")
+}
+
+function isPvpWolfMarkSource(source) {
+  return source.type === "PvP" && source.text?.includes("Wolf Marks")
 }
 
 function getGarlandCurrencyName(source) {
