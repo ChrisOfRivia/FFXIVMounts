@@ -7,26 +7,41 @@ const USER_AGENT = "FFXIVMountTracker/1.0"
 
 export async function searchCharacters({ name, server = "", dataCenter = "" }) {
   const trimmedName = name.trim()
+  const trimmedServer = server.trim()
+  const trimmedDataCenter = dataCenter.trim()
 
   if (!trimmedName) {
     return []
   }
 
-  const searchParams = {
-    name: trimmedName,
-    server: server.trim(),
-    data_center: dataCenter.trim(),
+  const searchAttempts = [
+    { path: SEARCH_PATH, params: { name: trimmedName, server: trimmedServer, data_center: trimmedDataCenter }, source: "ffxivcollect" },
+    { path: LODESTONE_SEARCH_PATH, params: { name: trimmedName, server: trimmedServer, data_center: trimmedDataCenter }, source: "lodestone" },
+    { path: SEARCH_PATH, params: { name: trimmedName, server: trimmedServer }, source: "ffxivcollect" },
+    { path: LODESTONE_SEARCH_PATH, params: { name: trimmedName, server: trimmedServer }, source: "lodestone" },
+    { path: SEARCH_PATH, params: { name: trimmedName, data_center: trimmedDataCenter }, source: "ffxivcollect" },
+    { path: LODESTONE_SEARCH_PATH, params: { name: trimmedName, data_center: trimmedDataCenter }, source: "lodestone" },
+    { path: SEARCH_PATH, params: { name: trimmedName }, source: "ffxivcollect" },
+    { path: LODESTONE_SEARCH_PATH, params: { name: trimmedName }, source: "lodestone" },
+  ]
+
+  const matchedCharacters = []
+
+  for (const attempt of searchAttempts) {
+    const html = await fetchHtml(buildCollectUrl(attempt.path, attempt.params))
+    const parsedCharacters = parseCharacterSearchResults(html, attempt.source)
+    const filteredCharacters = filterCharacters(parsedCharacters, {
+      name: trimmedName,
+      server: trimmedServer,
+      dataCenter: trimmedDataCenter,
+    })
+
+    if (filteredCharacters.length > 0) {
+      matchedCharacters.push(...filteredCharacters)
+    }
   }
 
-  const localHtml = await fetchHtml(buildCollectUrl(SEARCH_PATH, searchParams))
-  const localResults = parseCharacterSearchResults(localHtml, "ffxivcollect")
-
-  if (localResults.length > 0) {
-    return localResults
-  }
-
-  const lodestoneHtml = await fetchHtml(buildCollectUrl(LODESTONE_SEARCH_PATH, searchParams))
-  return parseCharacterSearchResults(lodestoneHtml, "lodestone")
+  return dedupeCharacters(matchedCharacters)
 }
 
 export async function getOwnedMounts(characterId) {
@@ -164,6 +179,20 @@ function dedupeCharacters(characters) {
   })
 }
 
+function filterCharacters(characters, filters) {
+  const normalizedName = normalizeCharacterValue(filters.name)
+  const normalizedServer = normalizeCharacterValue(filters.server)
+  const normalizedDataCenter = normalizeCharacterValue(filters.dataCenter)
+
+  return characters.filter((character) => {
+    const matchesName = normalizeCharacterValue(character.name) === normalizedName
+    const matchesServer = !normalizedServer || normalizeCharacterValue(character.world) === normalizedServer
+    const matchesDataCenter = !normalizedDataCenter || normalizeCharacterValue(character.dataCenter) === normalizedDataCenter
+
+    return matchesName && matchesServer && matchesDataCenter
+  })
+}
+
 function decodeHtml(value) {
   return value
     .replaceAll("&amp;", "&")
@@ -175,4 +204,8 @@ function decodeHtml(value) {
 
 function getCsrfToken(html) {
   return html.match(/<meta name="csrf-token" content="([^"]+)"/)?.[1] || null
+}
+
+function normalizeCharacterValue(value) {
+  return value.trim().toLowerCase()
 }
