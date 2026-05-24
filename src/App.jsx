@@ -1,4 +1,11 @@
 import { useEffect, useState } from "react"
+import {
+  DATA_CENTER_REGION,
+  REGIONS,
+  WORLD_DATA_CENTER,
+  getDataCentersByRegion,
+  getWorldsByDataCenter,
+} from "../shared/ffxivWorlds.js"
 
 const SOURCE_ICONS = {
   Unknown: "/icons/unknown.png",
@@ -143,6 +150,20 @@ const GARLAND_CURRENCY_NAME_OVERRIDES = {
   "Wolf Marks": "Wolf Mark",
 }
 
+const CHARACTER_STORAGE_KEY = "ffxiv-mount-tracker-character-sync"
+const DEFAULT_CHARACTER_FORM = {
+  region: "",
+  dataCenter: "",
+  world: "",
+  name: "",
+}
+
+const EMPTY_CHARACTER_SYNC_STATE = {
+  character: null,
+  ownedMountIds: [],
+  ownedMountNames: [],
+}
+
 function App() {
   const [mounts, setMounts] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
@@ -150,6 +171,13 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showProjectNotice, setShowProjectNotice] = useState(true)
   const [selectedMount, setSelectedMount] = useState(null)
+  const [showCharacterSync, setShowCharacterSync] = useState(false)
+  const [characterForm, setCharacterForm] = useState(DEFAULT_CHARACTER_FORM)
+  const [characterResults, setCharacterResults] = useState([])
+  const [characterStatus, setCharacterStatus] = useState({ tone: "idle", message: "" })
+  const [isSearchingCharacters, setIsSearchingCharacters] = useState(false)
+  const [isSyncingCharacter, setIsSyncingCharacter] = useState(false)
+  const [characterSyncState, setCharacterSyncState] = useState(() => getStoredCharacterSyncState())
 
   useEffect(() => {
     fetch("https://ffxivcollect.com/api/mounts")
@@ -160,17 +188,18 @@ function App() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = showProjectNotice || selectedMount ? "hidden" : ""
+    document.body.style.overflow = showProjectNotice || selectedMount || showCharacterSync ? "hidden" : ""
 
     return () => {
       document.body.style.overflow = ""
     }
-  }, [showProjectNotice, selectedMount])
+  }, [showProjectNotice, selectedMount, showCharacterSync])
 
   useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         setSelectedMount(null)
+        setShowCharacterSync(false)
       }
     }
 
@@ -180,6 +209,15 @@ function App() {
       window.removeEventListener("keydown", handleKeyDown)
     }
   }, [])
+
+  useEffect(() => {
+    if (characterSyncState.character) {
+      window.localStorage.setItem(CHARACTER_STORAGE_KEY, JSON.stringify(characterSyncState))
+      return
+    }
+
+    window.localStorage.removeItem(CHARACTER_STORAGE_KEY)
+  }, [characterSyncState])
 
   const filteredMounts = mounts.filter((mount) => {
     const mountType = getPrimarySource(mount).type
@@ -209,8 +247,158 @@ function App() {
     setSelectedMount(mount)
   }
 
+  function openCharacterSyncModal() {
+    setShowCharacterSync(true)
+
+    if (characterSyncState.character) {
+      setCharacterForm({
+        region: characterSyncState.character.region || "",
+        dataCenter: characterSyncState.character.dataCenter || "",
+        world: characterSyncState.character.world || "",
+        name: characterSyncState.character.name || "",
+      })
+    }
+  }
+
+  function handleCharacterFieldChange(field, value) {
+    setCharacterForm((currentForm) => {
+      if (field === "region") {
+        const nextDataCenters = getDataCentersByRegion(value)
+        const nextDataCenter = nextDataCenters.includes(currentForm.dataCenter) ? currentForm.dataCenter : ""
+        const nextWorlds = getWorldsByDataCenter(nextDataCenter)
+
+        return {
+          ...currentForm,
+          region: value,
+          dataCenter: nextDataCenter,
+          world: nextWorlds.includes(currentForm.world) ? currentForm.world : "",
+        }
+      }
+
+      if (field === "dataCenter") {
+        const nextWorlds = getWorldsByDataCenter(value)
+
+        return {
+          ...currentForm,
+          region: DATA_CENTER_REGION[value] || currentForm.region,
+          dataCenter: value,
+          world: nextWorlds.includes(currentForm.world) ? currentForm.world : "",
+        }
+      }
+
+      if (field === "world") {
+        const nextDataCenter = WORLD_DATA_CENTER[value] || currentForm.dataCenter
+
+        return {
+          ...currentForm,
+          region: DATA_CENTER_REGION[nextDataCenter] || currentForm.region,
+          dataCenter: nextDataCenter,
+          world: value,
+        }
+      }
+
+      return {
+        ...currentForm,
+        [field]: value,
+      }
+    })
+  }
+
+  async function handleCharacterSearch(event) {
+    event.preventDefault()
+
+    const trimmedName = characterForm.name.trim()
+
+    if (!trimmedName) {
+      setCharacterStatus({ tone: "error", message: "Enter a character name to search." })
+      setCharacterResults([])
+      return
+    }
+
+    setIsSearchingCharacters(true)
+    setCharacterStatus({ tone: "idle", message: "" })
+
+    try {
+      const searchUrl = new URL("/api/character-search", window.location.origin)
+      searchUrl.searchParams.set("name", trimmedName)
+
+      if (characterForm.world) {
+        searchUrl.searchParams.set("server", characterForm.world)
+      }
+
+      if (characterForm.dataCenter) {
+        searchUrl.searchParams.set("dataCenter", characterForm.dataCenter)
+      }
+
+      const response = await fetch(searchUrl)
+      const payload = await response.json()
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Character sync is unavailable right now.")
+      }
+
+      setCharacterResults(payload.characters || [])
+      setCharacterStatus({
+        tone: payload.characters?.length ? "success" : "muted",
+        message: payload.characters?.length
+          ? `Found ${payload.characters.length} matching character${payload.characters.length === 1 ? "" : "s"}.`
+          : "No matching characters were found. Try a broader search or a different world.",
+      })
+    } catch (error) {
+      setCharacterResults([])
+      setCharacterStatus({ tone: "error", message: error.message })
+    } finally {
+      setIsSearchingCharacters(false)
+    }
+  }
+
+  async function handleCharacterSync(character) {
+    setIsSyncingCharacter(true)
+    setCharacterStatus({ tone: "idle", message: "" })
+
+    try {
+      const mountUrl = new URL("/api/character-mounts", window.location.origin)
+      mountUrl.searchParams.set("id", character.id)
+
+      const response = await fetch(mountUrl)
+      const payload = await response.json()
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Character sync is unavailable right now.")
+      }
+
+      setCharacterSyncState({
+        character,
+        ownedMountIds: payload.ownedMountIds || [],
+        ownedMountNames: payload.ownedMountNames || [],
+      })
+      setCharacterStatus({
+        tone: "success",
+        message: `${character.name} synced successfully.`,
+      })
+      setShowCharacterSync(false)
+    } catch (error) {
+      setCharacterStatus({ tone: "error", message: error.message })
+    } finally {
+      setIsSyncingCharacter(false)
+    }
+  }
+
+  function clearCharacterSync() {
+    setCharacterSyncState(EMPTY_CHARACTER_SYNC_STATE)
+    setCharacterResults([])
+    setCharacterStatus({ tone: "muted", message: "Character sync cleared." })
+  }
+
   const selectedMountExpansion = selectedMount ? getExpansion(selectedMount.patch) : null
   const selectedMountSourceType = selectedMount ? getPrimarySource(selectedMount).type : "Unknown"
+  const syncedCharacter = characterSyncState.character
+  const ownedMountIdSet = new Set(characterSyncState.ownedMountIds)
+  const ownedMountNameSet = new Set(characterSyncState.ownedMountNames.map(normalizeMountOwnershipName))
+  const ownedMountCount = characterSyncState.ownedMountIds.length
+  const totalMountCount = mounts.length
+  const availableDataCenters = getDataCentersByRegion(characterForm.region)
+  const availableWorlds = getWorldsByDataCenter(characterForm.dataCenter)
 
   return (
     <>
@@ -295,6 +483,11 @@ function App() {
               <div className="mount-detail-info">
                 <div className="mount-detail-owned">
                   Owned by: <strong>{selectedMount.owned}</strong>
+                  {syncedCharacter ? (
+                    <p className="mount-detail-character-status">
+                      {syncedCharacter.name}: <strong>{isMountOwned(selectedMount, syncedCharacter, ownedMountIdSet, ownedMountNameSet) ? "Owned" : "Missing"}</strong>
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="mount-detail-section">
@@ -354,9 +547,166 @@ function App() {
         </div>
       ) : null}
 
+      {showCharacterSync ? (
+        <div
+          className="character-sync-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="character-sync-title"
+          onClick={() => setShowCharacterSync(false)}
+        >
+          <div className="character-sync-card" onClick={(event) => event.stopPropagation()}>
+            <button
+              className="character-sync-close"
+              onClick={() => setShowCharacterSync(false)}
+              aria-label="Close character sync"
+            >
+              X
+            </button>
+
+            <div className="character-sync-header">
+              <p className="character-sync-eyebrow">Character Sync</p>
+              <h2 id="character-sync-title">Find your character</h2>
+              <p className="character-sync-copy">
+                Search by region, data center, world, and character name, then sync owned mounts from FFXIV Collect.
+              </p>
+            </div>
+
+            <form className="character-sync-form" onSubmit={handleCharacterSearch}>
+              <label className="character-sync-field">
+                <span>Region</span>
+                <select
+                  value={characterForm.region}
+                  onChange={(event) => handleCharacterFieldChange("region", event.target.value)}
+                >
+                  <option value="">All Regions</option>
+                  {REGIONS.map((region) => (
+                    <option key={region.code} value={region.code}>
+                      {region.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="character-sync-field">
+                <span>Data Center</span>
+                <select
+                  value={characterForm.dataCenter}
+                  onChange={(event) => handleCharacterFieldChange("dataCenter", event.target.value)}
+                >
+                  <option value="">All Data Centers</option>
+                  {availableDataCenters.map((dataCenter) => (
+                    <option key={dataCenter} value={dataCenter}>
+                      {dataCenter}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="character-sync-field">
+                <span>World</span>
+                <select
+                  value={characterForm.world}
+                  onChange={(event) => handleCharacterFieldChange("world", event.target.value)}
+                >
+                  <option value="">All Worlds</option>
+                  {availableWorlds.map((world) => (
+                    <option key={world} value={world}>
+                      {world}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="character-sync-field character-sync-name-field">
+                <span>Character Name</span>
+                <input
+                  type="search"
+                  value={characterForm.name}
+                  onChange={(event) => handleCharacterFieldChange("name", event.target.value)}
+                  placeholder="Raelys Skyborn"
+                />
+              </label>
+
+              <div className="character-sync-actions">
+                <button className="character-sync-button" type="submit" disabled={isSearchingCharacters}>
+                  {isSearchingCharacters ? "Searching..." : "Search"}
+                </button>
+                {syncedCharacter ? (
+                  <button className="character-sync-secondary" type="button" onClick={clearCharacterSync}>
+                    Clear Sync
+                  </button>
+                ) : null}
+              </div>
+            </form>
+
+            {characterStatus.message ? (
+              <p className={`character-sync-status character-sync-status-${characterStatus.tone}`}>
+                {characterStatus.message}
+              </p>
+            ) : null}
+
+            <div className="character-sync-results">
+              {characterResults.map((character) => (
+                <div key={character.id} className="character-result-card">
+                  <img src={character.avatar} alt="" aria-hidden="true" />
+
+                  <div className="character-result-copy">
+                    <h3>{character.name}</h3>
+                    <p>
+                      {character.world} - {character.dataCenter} - {getRegionLabel(character.region)}
+                    </p>
+                    <span>{character.source === "lodestone" ? "Lodestone search" : "FFXIV Collect search"}</span>
+                  </div>
+
+                  <button
+                    className="character-sync-button"
+                    type="button"
+                    onClick={() => handleCharacterSync(character)}
+                    disabled={isSyncingCharacter}
+                  >
+                    {isSyncingCharacter ? "Syncing..." : "Sync"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="page-shell">
         <header className="page-header">
-          <h1>FFXIV Mount Tracker</h1>
+          <div className="page-header-row">
+            <button className="character-launch-button" onClick={openCharacterSyncModal}>
+              {syncedCharacter ? "Change Character" : "Sync Character"}
+            </button>
+
+            <div className="page-header-copy">
+              <h1>FFXIV Mount Tracker</h1>
+              {syncedCharacter ? (
+                <p className="page-header-character">
+                  {syncedCharacter.name} - {syncedCharacter.world} - {ownedMountCount}/{totalMountCount} mounts owned
+                </p>
+              ) : (
+                <p className="page-header-character page-header-character-muted">
+                  Sync a character to highlight owned mounts.
+                </p>
+              )}
+            </div>
+
+            {syncedCharacter ? (
+              <div className="character-summary-card">
+                <img src={syncedCharacter.avatar} alt="" aria-hidden="true" />
+                <div className="character-summary-copy">
+                  <strong>{syncedCharacter.name}</strong>
+                  <span>{getRegionLabel(syncedCharacter.region)}</span>
+                  <span>{syncedCharacter.dataCenter} / {syncedCharacter.world}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="page-header-spacer" aria-hidden="true" />
+            )}
+          </div>
         </header>
 
         <div className="app-shell">
@@ -445,14 +795,14 @@ function App() {
           </aside>
 
           <main className="content-area">
-            <div className="mount-grid">
-              {filteredMounts.map((mount) => (
-                <div
-                  key={mount.id}
-                  className="mount-card"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => openMountDetails(mount)}
+              <div className="mount-grid">
+                {filteredMounts.map((mount) => (
+                  <div
+                    key={mount.id}
+                    className={getMountCardClassName(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet)}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openMountDetails(mount)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault()
@@ -475,6 +825,11 @@ function App() {
                   </div>
                   <div className="mount-owned">
                     <h4>Owned by: {mount.owned}</h4>
+                    {syncedCharacter ? (
+                      <p className="mount-character-status">
+                        {isMountOwned(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet) ? "Owned" : "Missing"}
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="source-mount">
@@ -924,6 +1279,56 @@ function singularizeGarlandWord(word) {
   return word
 }
 
+function getStoredCharacterSyncState() {
+  if (typeof window === "undefined") {
+    return EMPTY_CHARACTER_SYNC_STATE
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(CHARACTER_STORAGE_KEY)
+
+    if (!storedValue) {
+      return EMPTY_CHARACTER_SYNC_STATE
+    }
+
+    const parsedValue = JSON.parse(storedValue)
+
+    return {
+      character: parsedValue.character || null,
+      ownedMountIds: Array.isArray(parsedValue.ownedMountIds) ? parsedValue.ownedMountIds : [],
+      ownedMountNames: Array.isArray(parsedValue.ownedMountNames) ? parsedValue.ownedMountNames : [],
+    }
+  } catch {
+    return EMPTY_CHARACTER_SYNC_STATE
+  }
+}
+
+function getRegionLabel(regionCode) {
+  return REGIONS.find((region) => region.code === regionCode)?.label || regionCode || "Unknown Region"
+}
+
+function normalizeMountOwnershipName(mountName) {
+  return mountName.trim().toLowerCase()
+}
+
+function isMountOwned(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet) {
+  if (!syncedCharacter) {
+    return false
+  }
+
+  return ownedMountIdSet.has(mount.id) || ownedMountNameSet.has(normalizeMountOwnershipName(mount.name))
+}
+
+function getMountCardClassName(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet) {
+  if (!syncedCharacter) {
+    return "mount-card"
+  }
+
+  return isMountOwned(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet)
+    ? "mount-card mount-card-owned"
+    : "mount-card mount-card-missing"
+}
+
 function getExpansion(patch) {
   const patchNumber = parseFloat(patch)
 
@@ -950,3 +1355,5 @@ function getExpansion(patch) {
 }
 
 export default App
+
+
