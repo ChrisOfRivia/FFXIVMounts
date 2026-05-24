@@ -94,6 +94,7 @@ const INSTANCE_TYPES = new Set([
 const MOGSTATION_SOURCE_TEXT = "Online Store"
 
 const WIKI_TITLE_OVERRIDES = {
+  "Sinus Ardonum": "Sinus Ardorum",
   "The Palace of the Dead": "Palace of the Dead",
 }
 
@@ -633,6 +634,10 @@ function getSourceLinkPriority(source) {
     return [getMogstationSourceLink]
   }
 
+  if (isCosmicFortuneSource(source) || isMechPilotRewardSource(source)) {
+    return [getWikiSourceLink, getVendorSourceLink]
+  }
+
   if (isMgpSource(source) || isGilSource(source)) {
     return [getVendorSourceLink]
   }
@@ -687,6 +692,12 @@ function getNormalizedWikiTitle(sourceText) {
     return feastTitle
   }
 
+  const cosmicExplorationTitle = getCosmicExplorationWikiTitle(sourceText)
+
+  if (cosmicExplorationTitle) {
+    return cosmicExplorationTitle
+  }
+
   const instanceContainerTitle = getInstanceContainerWikiTitle(sourceText)
 
   if (instanceContainerTitle) {
@@ -719,6 +730,14 @@ function getVendorWikiTitle(source) {
 
   if (isPvpWolfMarkSource(source)) {
     return "Mark Quartermaster"
+  }
+
+  if (isCosmicFortuneSource(source)) {
+    return "Orbitingway"
+  }
+
+  if (isMechPilotRewardSource(source)) {
+    return "Alerot"
   }
 
   const vendorSourceMatch = sourceText.match(/^(.*?) - \d[\d,]*\s+.+$/)
@@ -764,6 +783,26 @@ function getFeastWikiTitle(sourceText) {
   return "The Feast"
 }
 
+function getCosmicExplorationWikiTitle(sourceText) {
+  const cosmicFortuneMatch = sourceText.match(/^Cosmic Fortune - (.+)$/)
+
+  if (cosmicFortuneMatch) {
+    return "Cosmic Fortune"
+  }
+
+  const mechPilotRewardMatch = sourceText.match(/^Mech Pilot Reward - (.+)$/)
+
+  if (mechPilotRewardMatch) {
+    return normalizeCosmicExplorationZoneTitle(mechPilotRewardMatch[1])
+  }
+
+  return null
+}
+
+function normalizeCosmicExplorationZoneTitle(zoneTitle) {
+  return WIKI_TITLE_OVERRIDES[zoneTitle] || zoneTitle
+}
+
 function getInstanceContainerWikiTitle(sourceText) {
   const containerSourceMatch = sourceText.match(/^(.+?) - (Final Boss Chest(?:es)?|Bronze(?:\/Silver)? Coffer|Silver Coffer|Gold Sack|Silver Sack|Platinum Sack|Sack of First Light)$/)
 
@@ -794,6 +833,14 @@ function isMgpSource(source) {
 
 function isGilSource(source) {
   return source.text?.includes("Gil")
+}
+
+function isCosmicFortuneSource(source) {
+  return source.type === "Cosmic Exploration" && source.text?.startsWith("Cosmic Fortune - ")
+}
+
+function isMechPilotRewardSource(source) {
+  return source.type === "Cosmic Exploration" && source.text?.startsWith("Mech Pilot Reward - ")
 }
 
 function isPvpTrophyCrystalSource(source) {
