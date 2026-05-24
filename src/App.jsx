@@ -169,6 +169,7 @@ function App() {
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedExpansions, setSelectedExpansions] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [showOwnedOnly, setShowOwnedOnly] = useState(false)
   const [showProjectNotice, setShowProjectNotice] = useState(true)
   const [selectedMount, setSelectedMount] = useState(null)
   const [showCharacterSync, setShowCharacterSync] = useState(false)
@@ -219,6 +220,12 @@ function App() {
     window.localStorage.removeItem(CHARACTER_STORAGE_KEY)
   }, [characterSyncState])
 
+  const syncedCharacter = characterSyncState.character
+  const ownedMountIdSet = new Set(characterSyncState.ownedMountIds)
+  const ownedMountNameSet = new Set(characterSyncState.ownedMountNames.map(normalizeMountOwnershipName))
+  const ownedMountCount = characterSyncState.ownedMountIds.length
+  const totalMountCount = mounts.length
+
   const filteredMounts = mounts.filter((mount) => {
     const mountType = getPrimarySource(mount).type
     const expansion = getExpansion(mount.patch)
@@ -230,8 +237,9 @@ function App() {
 
     const matchesType = selectedTypes.length === 0 || selectedTypes.includes(mountType)
     const matchesExpansion = selectedExpansions.length === 0 || selectedExpansions.includes(expansion)
+    const matchesOwned = !showOwnedOnly || isMountOwned(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet)
 
-    return matchesType && matchesExpansion && matchesSearch
+    return matchesType && matchesExpansion && matchesSearch && matchesOwned
   })
 
   function toggleSelection(value, selectedValues, setSelectedValues) {
@@ -386,17 +394,13 @@ function App() {
 
   function clearCharacterSync() {
     setCharacterSyncState(EMPTY_CHARACTER_SYNC_STATE)
+    setShowOwnedOnly(false)
     setCharacterResults([])
     setCharacterStatus({ tone: "muted", message: "Character sync cleared." })
   }
 
   const selectedMountExpansion = selectedMount ? getExpansion(selectedMount.patch) : null
   const selectedMountSourceType = selectedMount ? getPrimarySource(selectedMount).type : "Unknown"
-  const syncedCharacter = characterSyncState.character
-  const ownedMountIdSet = new Set(characterSyncState.ownedMountIds)
-  const ownedMountNameSet = new Set(characterSyncState.ownedMountNames.map(normalizeMountOwnershipName))
-  const ownedMountCount = characterSyncState.ownedMountIds.length
-  const totalMountCount = mounts.length
   const availableDataCenters = getDataCentersByRegion(characterForm.region)
   const availableWorlds = getWorldsByDataCenter(characterForm.dataCenter)
 
@@ -570,6 +574,17 @@ function App() {
               <p className="character-sync-copy">
                 Search by region, data center, world, and character name, then sync owned mounts from FFXIV Collect.
               </p>
+              <p className="character-sync-warning">
+                If your{" "}
+                <a
+                  href="https://na.finalfantasyxiv.com/lodestone/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Lodestone
+                </a>
+                {" "}achievements or mount-related visibility settings are private, some mounts may not show as owned until those settings are made public there.
+              </p>
             </div>
 
             <form className="character-sync-form" onSubmit={handleCharacterSearch}>
@@ -724,6 +739,23 @@ function App() {
                   aria-label="Search mounts"
                 />
               </div>
+
+              {syncedCharacter ? (
+                <div className="filter-group">
+                  <div className="filter-heading">
+                    <h3>Owned</h3>
+                  </div>
+                  <button
+                    className={showOwnedOnly ? "owned-filter-button active" : "owned-filter-button"}
+                    onClick={() => setShowOwnedOnly((currentValue) => !currentValue)}
+                  >
+                    Show Owned Only
+                  </button>
+                  <p className="filter-helper-text">
+                    Filter the grid down to mounts your synced character owns.
+                  </p>
+                </div>
+              ) : null}
 
               <div className="filter-group">
                 <div className="filter-heading">

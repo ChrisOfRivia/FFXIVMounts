@@ -145,6 +145,16 @@ body {
   line-height: 1.5;
 }
 
+.character-sync-warning {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(246, 199, 105, 0.18);
+  border-radius: 14px;
+  background: rgba(246, 199, 105, 0.1);
+  color: #f3ddb0;
+  line-height: 1.5;
+}
+
 .character-sync-form {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -687,6 +697,43 @@ body {
 
 .search-filter {
   margin-bottom: 20px;
+}
+
+.owned-filter-button {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ececec;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.owned-filter-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.owned-filter-button.active {
+  background: linear-gradient(180deg, rgba(243, 195, 108, 0.28) 0%, rgba(213, 158, 66, 0.18) 100%);
+  border-color: rgba(255, 232, 181, 0.35);
+  color: #fff3d1;
+}
+
+.owned-filter-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.filter-helper-text {
+  margin: 10px 0 0;
+  color: #bdbdbd;
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .search-input {
