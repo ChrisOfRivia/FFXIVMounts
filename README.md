@@ -33,6 +33,8 @@ Users can filter mounts by:
 - Sticky filter panel for easier navigation
 - Source icons and expansion icons
 - Live API-driven data
+- Direct (and indirect) links to sources
+- Visualization with more information when clicking on a card
 
 ---
 
@@ -53,8 +55,6 @@ https://ffxivcollect.com/
 - Favorites system
 - Character integration
 - UI/UX improvements
-- Card pop-up display with further information
-- Clickable source
 
 ---
 
