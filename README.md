@@ -35,6 +35,7 @@ Users can filter mounts by:
 - Live API-driven data
 - Direct (and indirect) links to sources
 - Visualization with more information when clicking on a card
+- Character integration
 
 ---
 
@@ -51,9 +52,7 @@ https://ffxivcollect.com/
 
 ## Future Ideas
 
-- Owned / unowned tracking
 - Favorites system
-- Character integration
 - UI/UX improvements
 
 ---
