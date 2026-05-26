@@ -1317,10 +1317,16 @@ body {
 
   .page-header-row {
     grid-template-columns: 1fr;
+    justify-items: center;
   }
 
   .page-header-spacer {
     display: none;
+  }
+
+  .page-header-row > :first-child,
+  .page-header-row > :last-child {
+    justify-self: center;
   }
 
   .character-summary-actions {
