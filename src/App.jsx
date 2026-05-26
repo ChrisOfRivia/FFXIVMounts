@@ -176,6 +176,7 @@ function App() {
   const [characterForm, setCharacterForm] = useState(DEFAULT_CHARACTER_FORM)
   const [characterResults, setCharacterResults] = useState([])
   const [characterStatus, setCharacterStatus] = useState({ tone: "idle", message: "" })
+  const [characterPanelStatus, setCharacterPanelStatus] = useState({ tone: "idle", message: "" })
   const [isSearchingCharacters, setIsSearchingCharacters] = useState(false)
   const [isSyncingCharacter, setIsSyncingCharacter] = useState(false)
   const [characterSyncState, setCharacterSyncState] = useState(() => getStoredCharacterSyncState())
@@ -256,16 +257,11 @@ function App() {
   }
 
   function openCharacterSyncModal() {
+    setCharacterForm(DEFAULT_CHARACTER_FORM)
+    setCharacterResults([])
+    setCharacterStatus({ tone: "idle", message: "" })
+    setCharacterPanelStatus({ tone: "idle", message: "" })
     setShowCharacterSync(true)
-
-    if (characterSyncState.character) {
-      setCharacterForm({
-        region: characterSyncState.character.region || "",
-        dataCenter: characterSyncState.character.dataCenter || "",
-        world: characterSyncState.character.world || "",
-        name: characterSyncState.character.name || "",
-      })
-    }
   }
 
   function handleCharacterFieldChange(field, value) {
@@ -360,9 +356,10 @@ function App() {
     }
   }
 
-  async function handleCharacterSync(character) {
+  async function syncCharacterMounts(character, { closeModal = false } = {}) {
     setIsSyncingCharacter(true)
     setCharacterStatus({ tone: "idle", message: "" })
+    setCharacterPanelStatus({ tone: "idle", message: "" })
 
     try {
       const mountUrl = new URL("/api/character-mounts", window.location.origin)
@@ -384,19 +381,37 @@ function App() {
         tone: "success",
         message: `${character.name} synced successfully.`,
       })
-      setShowCharacterSync(false)
+
+      if (closeModal) {
+        setShowCharacterSync(false)
+      }
     } catch (error) {
       setCharacterStatus({ tone: "error", message: error.message })
+      setCharacterPanelStatus({ tone: "error", message: error.message })
     } finally {
       setIsSyncingCharacter(false)
     }
   }
 
+  async function handleCharacterSync(character) {
+    await syncCharacterMounts(character, { closeModal: true })
+  }
+
+  async function refreshCharacterSync() {
+    if (!syncedCharacter) {
+      return
+    }
+
+    await syncCharacterMounts(syncedCharacter)
+  }
+
   function clearCharacterSync() {
     setCharacterSyncState(EMPTY_CHARACTER_SYNC_STATE)
+    setCharacterForm(DEFAULT_CHARACTER_FORM)
     setShowOwnedOnly(false)
     setCharacterResults([])
-    setCharacterStatus({ tone: "muted", message: "Character sync cleared." })
+    setCharacterStatus({ tone: "idle", message: "" })
+    setCharacterPanelStatus({ tone: "muted", message: "Character sync cleared." })
   }
 
   const selectedMountExpansion = selectedMount ? getExpansion(selectedMount.patch) : null
@@ -647,11 +662,6 @@ function App() {
                 <button className="character-sync-button" type="submit" disabled={isSearchingCharacters}>
                   {isSearchingCharacters ? "Searching..." : "Search"}
                 </button>
-                {syncedCharacter ? (
-                  <button className="character-sync-secondary" type="button" onClick={clearCharacterSync}>
-                    Clear Sync
-                  </button>
-                ) : null}
               </div>
             </form>
 
@@ -692,9 +702,13 @@ function App() {
       <div className="page-shell">
         <header className="page-header">
           <div className="page-header-row">
-            <button className="character-launch-button" onClick={openCharacterSyncModal}>
-              {syncedCharacter ? "Change Character" : "Sync Character"}
-            </button>
+            {syncedCharacter ? (
+              <div className="page-header-spacer" aria-hidden="true" />
+            ) : (
+              <button className="character-launch-button" onClick={openCharacterSyncModal}>
+                Sync Character
+              </button>
+            )}
 
             <div className="page-header-copy">
               <h1>FFXIV Mount Tracker</h1>
@@ -710,13 +724,56 @@ function App() {
             </div>
 
             {syncedCharacter ? (
-              <div className="character-summary-card">
-                <img src={syncedCharacter.avatar} alt="" aria-hidden="true" />
-                <div className="character-summary-copy">
-                  <strong>{syncedCharacter.name}</strong>
-                  <span>{getRegionLabel(syncedCharacter.region)}</span>
-                  <span>{syncedCharacter.dataCenter} / {syncedCharacter.world}</span>
+              <div className="character-summary-stack">
+                <div className="character-summary-card">
+                  <div className="character-summary-main">
+                    <img src={syncedCharacter.avatar} alt="" aria-hidden="true" />
+                    <div className="character-summary-copy">
+                      <strong>{syncedCharacter.name}</strong>
+                      <span>{getRegionLabel(syncedCharacter.region)}</span>
+                      <span>{syncedCharacter.dataCenter} / {syncedCharacter.world}</span>
+                    </div>
+                  </div>
+
+                  <div className="character-summary-footer">
+                    <button
+                      className="character-summary-change-button"
+                      type="button"
+                      onClick={openCharacterSyncModal}
+                    >
+                      Change Character
+                    </button>
+
+                    <div className="character-summary-actions">
+                      <button
+                        className="character-summary-action character-summary-action-refresh"
+                        type="button"
+                        onClick={refreshCharacterSync}
+                        disabled={isSyncingCharacter}
+                        aria-label={`Refresh sync for ${syncedCharacter.name}`}
+                        title="Refresh sync"
+                      >
+                        {"\u21BB"}
+                      </button>
+                      <button
+                        className="character-summary-action character-summary-action-danger"
+                        type="button"
+                        onClick={clearCharacterSync}
+                        disabled={isSyncingCharacter}
+                        aria-label={`Clear sync for ${syncedCharacter.name}`}
+                        title="Clear sync"
+                      >
+                        X
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
+                {characterPanelStatus.message ? (
+                  <p className={`character-summary-status character-summary-status-${characterPanelStatus.tone}`}>
+                    {characterPanelStatus.message}
+                  </p>
+                ) : null}
               </div>
             ) : (
               <div className="page-header-spacer" aria-hidden="true" />

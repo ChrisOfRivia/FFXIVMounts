@@ -236,7 +236,6 @@ body {
 }
 
 .character-sync-button,
-.character-sync-secondary,
 .character-launch-button {
   min-height: 42px;
   padding: 0 16px;
@@ -255,27 +254,41 @@ body {
   color: #1f1710;
 }
 
-.character-sync-secondary,
 .character-summary-card {
   background: rgba(255, 255, 255, 0.05);
   color: #f0f0f0;
 }
 
 .character-sync-button:hover,
-.character-sync-secondary:hover,
 .character-launch-button:hover,
 .character-sync-close:hover {
   transform: translateY(-1px);
 }
 
+.character-summary-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
 .character-summary-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f0f0f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+}
+
+.character-summary-main {
   display: flex;
   align-items: center;
   gap: 12px;
   min-height: 64px;
   padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
 }
 
 .character-summary-card img {
@@ -299,6 +312,113 @@ body {
 .character-summary-copy span {
   color: #d4d4d4;
   font-size: 0.82rem;
+}
+
+.character-summary-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.character-summary-change-button {
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ececec;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.character-summary-change-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.character-summary-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.character-summary-action {
+  min-width: 34px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.character-summary-action-refresh {
+  background: linear-gradient(180deg, #f1c36c 0%, #d59e42 100%);
+  border-color: rgba(255, 232, 181, 0.35);
+  color: #1f1710;
+}
+
+.character-summary-action-danger {
+  background: rgba(140, 44, 44, 0.22);
+  border-color: rgba(255, 170, 170, 0.2);
+  color: #ffd7d7;
+}
+
+.character-summary-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.character-summary-action-refresh:hover:not(:disabled) {
+  background: linear-gradient(180deg, #f7d38a 0%, #e0ad55 100%);
+  border-color: rgba(255, 238, 197, 0.42);
+}
+
+.character-summary-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.character-summary-action-danger:hover:not(:disabled) {
+  background: rgba(173, 52, 52, 0.28);
+  border-color: rgba(255, 190, 190, 0.28);
+  color: #ffe4e4;
+}
+
+.character-summary-status {
+  margin: 0;
+  text-align: right;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.character-summary-status-success {
+  color: #dbf2d6;
+}
+
+.character-summary-status-error {
+  color: #ffd7d7;
+}
+
+.character-summary-status-muted {
+  color: #d4d4d4;
 }
 
 .character-sync-status {
@@ -643,9 +763,17 @@ body {
 
 .page-header-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 18px;
+}
+
+.page-header-row > :first-child {
+  justify-self: start;
+}
+
+.page-header-row > :last-child {
+  justify-self: end;
 }
 
 .page-header-copy {
@@ -1154,6 +1282,19 @@ body {
 
   .page-header-spacer {
     display: none;
+  }
+
+  .character-summary-actions {
+    justify-content: center;
+  }
+
+  .character-summary-footer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .character-summary-status {
+    text-align: center;
   }
 
   .app-shell {
