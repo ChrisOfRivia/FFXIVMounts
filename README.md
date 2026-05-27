@@ -58,18 +58,6 @@ npm install
 npm run dev
 ```
 
-3. Build for production:
-
-```bash
-npm run build
-```
-
-4. Preview the production build locally:
-
-```bash
-npm run preview
-```
-
 ## Project Notes
 
 - This is a personal hobby project built for learning, experimentation, and portfolio growth.
@@ -88,5 +76,4 @@ Mount data is provided through the public [FFXIV Collect](https://ffxivcollect.c
 
 - More UI/UX polish
 - Additional sorting and collection tools
-- Better progress tracking views
 - More refined mobile interactions
