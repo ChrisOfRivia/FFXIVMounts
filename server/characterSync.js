@@ -41,7 +41,11 @@ export async function searchCharacters({ name, server = "", dataCenter = "" }) {
     }
   }
 
-  return dedupeCharacters(matchedCharacters)
+  return sortCharactersBySearchMatch(dedupeCharacters(matchedCharacters), {
+    name: trimmedName,
+    server: trimmedServer,
+    dataCenter: trimmedDataCenter,
+  })
 }
 
 export async function getOwnedMounts(characterId) {
@@ -185,12 +189,76 @@ function filterCharacters(characters, filters) {
   const normalizedDataCenter = normalizeCharacterValue(filters.dataCenter)
 
   return characters.filter((character) => {
-    const matchesName = normalizeCharacterValue(character.name) === normalizedName
+    const matchesName = getCharacterNameMatchScore(character.name, normalizedName) >= 0
     const matchesServer = !normalizedServer || normalizeCharacterValue(character.world) === normalizedServer
     const matchesDataCenter = !normalizedDataCenter || normalizeCharacterValue(character.dataCenter) === normalizedDataCenter
 
     return matchesName && matchesServer && matchesDataCenter
   })
+}
+
+function sortCharactersBySearchMatch(characters, filters) {
+  const normalizedName = normalizeCharacterValue(filters.name)
+
+  return [...characters].sort((leftCharacter, rightCharacter) => {
+    const scoreDifference =
+      getCharacterNameMatchScore(rightCharacter.name, normalizedName) -
+      getCharacterNameMatchScore(leftCharacter.name, normalizedName)
+
+    if (scoreDifference !== 0) {
+      return scoreDifference
+    }
+
+    return leftCharacter.name.localeCompare(rightCharacter.name)
+  })
+}
+
+function getCharacterNameMatchScore(characterName, normalizedQuery) {
+  if (!normalizedQuery) {
+    return 0
+  }
+
+  const normalizedCharacterName = normalizeCharacterValue(characterName)
+  const characterNameParts = normalizedCharacterName.split(/\s+/).filter(Boolean)
+  const queryParts = normalizedQuery.split(/\s+/).filter(Boolean)
+
+  if (normalizedCharacterName === normalizedQuery) {
+    return 600
+  }
+
+  if (characterNameParts.some((part) => part === normalizedQuery)) {
+    return 500
+  }
+
+  if (
+    queryParts.length > 1 &&
+    queryParts.length <= characterNameParts.length &&
+    queryParts.every((part, index) => characterNameParts[index]?.startsWith(part))
+  ) {
+    return 450
+  }
+
+  if (queryParts.length > 1 && queryParts.every((part) => characterNameParts.some((namePart) => namePart === part))) {
+    return 400
+  }
+
+  if (queryParts.length > 1 && queryParts.every((part) => characterNameParts.some((namePart) => namePart.startsWith(part)))) {
+    return 350
+  }
+
+  if (characterNameParts.some((part) => part.startsWith(normalizedQuery))) {
+    return 300
+  }
+
+  if (normalizedCharacterName.startsWith(normalizedQuery)) {
+    return 250
+  }
+
+  if (normalizedCharacterName.includes(normalizedQuery)) {
+    return 200
+  }
+
+  return -1
 }
 
 function decodeHtml(value) {

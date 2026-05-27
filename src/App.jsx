@@ -151,6 +151,7 @@ const GARLAND_CURRENCY_NAME_OVERRIDES = {
 }
 
 const CHARACTER_STORAGE_KEY = "ffxiv-mount-tracker-character-sync"
+const INITIAL_CHARACTER_RESULTS_COUNT = 12
 const DEFAULT_CHARACTER_FORM = {
   region: "",
   dataCenter: "",
@@ -349,7 +350,7 @@ function App() {
       setCharacterStatus({
         tone: payload.characters?.length ? "success" : "muted",
         message: payload.characters?.length
-          ? `Found ${payload.characters.length} matching character${payload.characters.length === 1 ? "" : "s"}.`
+          ? `Found ${payload.characters.length} possible character${payload.characters.length === 1 ? "" : "s"}.`
           : "No matching characters were found. Try a broader search or a different world.",
       })
     } catch (error) {
@@ -422,6 +423,7 @@ function App() {
   const selectedMountSourceType = selectedMount ? getPrimarySource(selectedMount).type : "Unknown"
   const availableDataCenters = getDataCentersByRegion(characterForm.region)
   const availableWorlds = getWorldsByDataCenter(characterForm.dataCenter)
+  const visibleCharacterResults = characterResults.slice(0, INITIAL_CHARACTER_RESULTS_COUNT)
 
   return (
     <>
@@ -591,7 +593,7 @@ function App() {
               <p className="character-sync-eyebrow">Character Sync</p>
               <h2 id="character-sync-title">Find your character</h2>
               <p className="character-sync-copy">
-                Search by region, data center, world, and character name, then sync owned mounts from FFXIV Collect.
+                Search by region, data center, world, and full or partial character name, then sync owned mounts from FFXIV Collect.
               </p>
               <p className="character-sync-warning">
                 If your{" "}
@@ -658,7 +660,7 @@ function App() {
                   type="search"
                   value={characterForm.name}
                   onChange={(event) => handleCharacterFieldChange("name", event.target.value)}
-                  placeholder="Raelys Skyborn"
+                  placeholder="Raelys, Skyborn, or Raelys Skyborn"
                 />
               </label>
 
@@ -676,7 +678,7 @@ function App() {
             ) : null}
 
             <div className="character-sync-results">
-              {characterResults.map((character) => (
+              {visibleCharacterResults.map((character) => (
                 <div key={character.id} className="character-result-card">
                   <img src={character.avatar} alt="" aria-hidden="true" />
 
