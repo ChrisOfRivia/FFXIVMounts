@@ -240,11 +240,12 @@ function App() {
   const favoriteMountIdSet = new Set(favoriteMountIds)
   const ownedMountCount = characterSyncState.ownedMountIds.length
   const totalMountCount = mounts.length
+  const trimmedSearchQuery = searchQuery.trim()
 
   const filteredMounts = mounts.filter((mount) => {
     const mountType = getPrimarySource(mount).type
     const expansion = getExpansion(mount.patch)
-    const normalizedQuery = searchQuery.trim().toLowerCase()
+    const normalizedQuery = trimmedSearchQuery.toLowerCase()
     const matchesSearch =
       normalizedQuery === "" ||
       mount.name.toLowerCase().includes(normalizedQuery) ||
@@ -837,42 +838,64 @@ function App() {
                 />
               </div>
 
-              {syncedCharacter ? (
-                <div className="filter-group">
-                  <div className="filter-heading">
-                    <h3>Owned</h3>
-                  </div>
-                  <div className="owned-filter-actions">
+              <div className="filter-group">
+                <div className="filter-heading">
+                  <h3>Collection</h3>
+                </div>
+                <div
+                  className={
+                    syncedCharacter
+                      ? "collection-filter-actions"
+                      : "collection-filter-actions collection-filter-actions-single"
+                  }
+                >
+                  {syncedCharacter ? (
                     <button
-                      className={ownedFilter === "owned" ? "owned-filter-button active" : "owned-filter-button"}
+                      className={
+                        ownedFilter === "owned"
+                          ? "collection-filter-button active"
+                          : "collection-filter-button"
+                      }
                       onClick={() =>
                         setOwnedFilter((currentValue) => (currentValue === "owned" ? "all" : "owned"))
                       }
+                      title="Show owned mounts"
+                      aria-label="Show owned mounts"
+                      aria-pressed={ownedFilter === "owned"}
+                      type="button"
                     >
-                      Show Owned
+                      <span className="collection-filter-icon collection-filter-icon-owned" aria-hidden="true" />
                     </button>
+                  ) : null}
+                  {syncedCharacter ? (
                     <button
-                      className={ownedFilter === "unowned" ? "owned-filter-button active" : "owned-filter-button"}
+                      className={
+                        ownedFilter === "unowned"
+                          ? "collection-filter-button active"
+                          : "collection-filter-button"
+                      }
                       onClick={() =>
                         setOwnedFilter((currentValue) => (currentValue === "unowned" ? "all" : "unowned"))
                       }
+                      title="Show missing mounts"
+                      aria-label="Show missing mounts"
+                      aria-pressed={ownedFilter === "unowned"}
+                      type="button"
                     >
-                      Show Unowned
+                      <span className="collection-filter-icon collection-filter-icon-unowned" aria-hidden="true" />
                     </button>
-                  </div>
+                  ) : null}
+                  <button
+                    className={showFavoritesOnly ? "collection-filter-button active" : "collection-filter-button"}
+                    onClick={() => setShowFavoritesOnly((currentValue) => !currentValue)}
+                    title="Show favorite mounts"
+                    aria-label="Show favorite mounts"
+                    aria-pressed={showFavoritesOnly}
+                    type="button"
+                  >
+                    <span className="collection-filter-icon collection-filter-icon-favorite" aria-hidden="true" />
+                  </button>
                 </div>
-              ) : null}
-
-              <div className="filter-group">
-                <div className="filter-heading">
-                  <h3>Favorites</h3>
-                </div>
-                <button
-                  className={showFavoritesOnly ? "owned-filter-button active" : "owned-filter-button"}
-                  onClick={() => setShowFavoritesOnly((currentValue) => !currentValue)}
-                >
-                  Show Favorites
-                </button>
               </div>
 
               <div className="filter-group">
@@ -881,6 +904,7 @@ function App() {
                   <button
                     className={selectedTypes.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
                     onClick={() => setSelectedTypes([])}
+                    type="button"
                   >
                     <img src="/icons/all.png" alt="" aria-hidden="true" />
                     <span>Reset</span>
@@ -897,8 +921,10 @@ function App() {
                             key={type}
                             className={selectedTypes.includes(type) ? "filter-button type-button active" : "filter-button type-button"}
                             onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
+                            title={type}
+                            type="button"
                           >
-                            <img src={SOURCE_ICONS[type]} alt={type} />
+                            <img src={SOURCE_ICONS[type]} alt="" aria-hidden="true" />
                           </button>
                         ))}
                       </div>
@@ -913,6 +939,7 @@ function App() {
                   <button
                     className={selectedExpansions.length === 0 ? "reset-filter-button active" : "reset-filter-button"}
                     onClick={() => setSelectedExpansions([])}
+                    type="button"
                   >
                     <img src="/icons/all.png" alt="" aria-hidden="true" />
                     <span>Reset</span>
@@ -931,10 +958,12 @@ function App() {
                       onClick={() =>
                         toggleSelection(expansion.code, selectedExpansions, setSelectedExpansions)
                       }
+                      type="button"
                     >
                       <img
                         src={expansion.icon}
-                        alt={expansion.fullName}
+                        alt=""
+                        aria-hidden="true"
                       />
                       <span className="expansion-label">{expansion.label}</span>
                     </button>
