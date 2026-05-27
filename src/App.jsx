@@ -42,23 +42,27 @@ const SOURCE_ICONS = {
 const TYPE_GROUPS = [
   {
     label: "Instances",
-    types: ["Dungeon", "Trial", "Raid", "Chaotic Raid", "Deep Dungeon", "V&C Dungeon"],
+    types: ["Dungeon", "Raid", "Trial", "Chaotic Raid", "Deep Dungeon", "V&C Dungeon"],
   },
   {
     label: "Exploration",
-    types: ["Eureka", "Bozja", "Occult Crescent", "Treasure Hunt", "Voyages"],
+    types: ["Eureka", , "Occult Crescent", "Treasure Hunt", "Voyages", "Bozja"],
   },
   {
     label: "Progression",
-    types: ["Quest", "Achievement", "Hunts", "FATE", "Wondrous Tails"],
+    types: ["Quest", "Achievement", "FATE", "Hunts"],
   },
   {
     label: "Side Content",
-    types: ["Tribal", "Island Sanctuary", "Gold Saucer", "Skybuilders", "Gathering", "Crafting"],
+    types: ["Tribal", "Island Sanctuary", "Gold Saucer", "Cosmic Exploration", "Wondrous Tails", "Skybuilders", "Gathering", "Crafting"],
+  },
+  {
+    label: "Competitive",
+    types: ["PvP"],
   },
   {
     label: "Special",
-    types: ["Event", "Premium", "Purchase", "Cosmic Exploration", "PvP", "Other"],
+    types: ["Event", "Premium", "Purchase", "Other"],
   },
 ]
 
@@ -974,14 +978,14 @@ function App() {
           </aside>
 
           <main className="content-area">
-              <div className="mount-grid">
-                {filteredMounts.map((mount) => (
-                  <div
-                    key={mount.id}
-                    className={getMountCardClassName(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet)}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => openMountDetails(mount)}
+            <div className="mount-grid">
+              {filteredMounts.map((mount) => (
+                <div
+                  key={mount.id}
+                  className={getMountCardClassName(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet)}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openMountDetails(mount)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault()

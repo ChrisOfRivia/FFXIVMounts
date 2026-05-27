@@ -1191,6 +1191,10 @@ body {
   transform: scale(1.04);
 }
 
+.filter-button:hover img {
+  filter: grayscale(0%);
+}
+
 .type-button {
   width: 100%;
   aspect-ratio: 1 / 1;
