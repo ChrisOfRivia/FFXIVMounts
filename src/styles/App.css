@@ -1245,7 +1245,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: calc(20px * var(--ui-scale));
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .mount-card {
