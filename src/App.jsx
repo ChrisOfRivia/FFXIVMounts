@@ -151,6 +151,7 @@ const GARLAND_CURRENCY_NAME_OVERRIDES = {
 }
 
 const CHARACTER_STORAGE_KEY = "ffxiv-mount-tracker-character-sync"
+const FAVORITE_MOUNTS_STORAGE_KEY = "ffxiv-mount-tracker-favorites"
 const INITIAL_CHARACTER_RESULTS_COUNT = 12
 const DEFAULT_CHARACTER_FORM = {
   region: "",
@@ -171,6 +172,7 @@ function App() {
   const [selectedExpansions, setSelectedExpansions] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
   const [ownedFilter, setOwnedFilter] = useState("all")
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const [showProjectNotice, setShowProjectNotice] = useState(true)
   const [selectedMount, setSelectedMount] = useState(null)
   const [showCharacterSync, setShowCharacterSync] = useState(false)
@@ -181,6 +183,7 @@ function App() {
   const [isSearchingCharacters, setIsSearchingCharacters] = useState(false)
   const [isSyncingCharacter, setIsSyncingCharacter] = useState(false)
   const [characterSyncState, setCharacterSyncState] = useState(() => getStoredCharacterSyncState())
+  const [favoriteMountIds, setFavoriteMountIds] = useState(() => getStoredFavoriteMountIds())
 
   useEffect(() => {
     fetch("https://ffxivcollect.com/api/mounts")
@@ -222,9 +225,19 @@ function App() {
     window.localStorage.removeItem(CHARACTER_STORAGE_KEY)
   }, [characterSyncState])
 
+  useEffect(() => {
+    if (favoriteMountIds.length > 0) {
+      window.localStorage.setItem(FAVORITE_MOUNTS_STORAGE_KEY, JSON.stringify(favoriteMountIds))
+      return
+    }
+
+    window.localStorage.removeItem(FAVORITE_MOUNTS_STORAGE_KEY)
+  }, [favoriteMountIds])
+
   const syncedCharacter = characterSyncState.character
   const ownedMountIdSet = new Set(characterSyncState.ownedMountIds)
   const ownedMountNameSet = new Set(characterSyncState.ownedMountNames.map(normalizeMountOwnershipName))
+  const favoriteMountIdSet = new Set(favoriteMountIds)
   const ownedMountCount = characterSyncState.ownedMountIds.length
   const totalMountCount = mounts.length
 
@@ -244,8 +257,9 @@ function App() {
       ownedFilter === "all" ||
       (ownedFilter === "owned" && mountIsOwned) ||
       (ownedFilter === "unowned" && !mountIsOwned)
+    const matchesFavorites = !showFavoritesOnly || favoriteMountIdSet.has(mount.id)
 
-    return matchesType && matchesExpansion && matchesSearch && matchesOwned
+    return matchesType && matchesExpansion && matchesSearch && matchesOwned && matchesFavorites
   })
 
   function toggleSelection(value, selectedValues, setSelectedValues) {
@@ -259,6 +273,16 @@ function App() {
 
   function openMountDetails(mount) {
     setSelectedMount(mount)
+  }
+
+  function toggleFavoriteMount(mountId) {
+    setFavoriteMountIds((currentIds) => {
+      if (currentIds.includes(mountId)) {
+        return currentIds.filter((id) => id !== mountId)
+      }
+
+      return [...currentIds, mountId]
+    })
   }
 
   function openCharacterSyncModal() {
@@ -421,6 +445,7 @@ function App() {
 
   const selectedMountExpansion = selectedMount ? getExpansion(selectedMount.patch) : null
   const selectedMountSourceType = selectedMount ? getPrimarySource(selectedMount).type : "Unknown"
+  const selectedMountIsFavorite = selectedMount ? favoriteMountIdSet.has(selectedMount.id) : false
   const availableDataCenters = getDataCentersByRegion(characterForm.region)
   const availableWorlds = getWorldsByDataCenter(characterForm.dataCenter)
   const visibleCharacterResults = characterResults.slice(0, INITIAL_CHARACTER_RESULTS_COUNT)
@@ -455,11 +480,21 @@ function App() {
         >
           <div className="mount-detail-card" onClick={(event) => event.stopPropagation()}>
             <button
+              className={selectedMountIsFavorite ? "mount-detail-favorite active" : "mount-detail-favorite"}
+              onClick={() => toggleFavoriteMount(selectedMount.id)}
+              aria-label={selectedMountIsFavorite ? "Remove from favorites" : "Add to favorites"}
+              aria-pressed={selectedMountIsFavorite}
+              type="button"
+            >
+              ★
+            </button>
+            <button
               className="mount-detail-close"
               onClick={() => setSelectedMount(null)}
               aria-label="Close mount details"
+              type="button"
             >
-              X
+              ×
             </button>
 
             <div className="mount-detail-header">
@@ -585,8 +620,9 @@ function App() {
               className="character-sync-close"
               onClick={() => setShowCharacterSync(false)}
               aria-label="Close character sync"
+              type="button"
             >
-              X
+              ×
             </button>
 
             <div className="character-sync-header">
@@ -768,9 +804,7 @@ function App() {
                         disabled={isSyncingCharacter}
                         aria-label={`Clear sync for ${syncedCharacter.name}`}
                         title="Clear sync"
-                      >
-                        X
-                      </button>
+                      />
                     </div>
                   </div>
                 </div>
@@ -828,6 +862,18 @@ function App() {
                   </div>
                 </div>
               ) : null}
+
+              <div className="filter-group">
+                <div className="filter-heading">
+                  <h3>Favorites</h3>
+                </div>
+                <button
+                  className={showFavoritesOnly ? "owned-filter-button active" : "owned-filter-button"}
+                  onClick={() => setShowFavoritesOnly((currentValue) => !currentValue)}
+                >
+                  Show Favorites
+                </button>
+              </div>
 
               <div className="filter-group">
                 <div className="filter-heading">
@@ -914,6 +960,11 @@ function App() {
                     }
                   }}
                 >
+                  {favoriteMountIdSet.has(mount.id) ? (
+                    <span className="mount-card-favorite" aria-label="Favorited" title="Favorited">
+                      ★
+                    </span>
+                  ) : null}
                   <div className="mount-patch">
                     <img
                       src={
@@ -1404,6 +1455,28 @@ function getStoredCharacterSyncState() {
     }
   } catch {
     return EMPTY_CHARACTER_SYNC_STATE
+  }
+}
+
+function getStoredFavoriteMountIds() {
+  if (typeof window === "undefined") {
+    return []
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(FAVORITE_MOUNTS_STORAGE_KEY)
+
+    if (!storedValue) {
+      return []
+    }
+
+    const parsedValue = JSON.parse(storedValue)
+
+    return Array.isArray(parsedValue)
+      ? parsedValue.map((value) => Number(value)).filter((value) => Number.isFinite(value))
+      : []
+  } catch {
+    return []
   }
 }
 
