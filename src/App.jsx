@@ -723,7 +723,7 @@ function App() {
                   type="search"
                   value={characterForm.name}
                   onChange={(event) => handleCharacterFieldChange("name", event.target.value)}
-                  placeholder="Raelys, Skyborn, or Raelys Skyborn"
+                  placeholder="Enter a character name"
                 />
               </label>
 
