@@ -262,6 +262,14 @@ function App() {
 
     return matchesType && matchesExpansion && matchesSearch && matchesOwned && matchesFavorites
   })
+  const showFavoritesEmptyState = showFavoritesOnly && favoriteMountIds.length === 0
+  const showFavoritesFilteredEmptyState = showFavoritesOnly && favoriteMountIds.length > 0 && filteredMounts.length === 0
+  const showOwnedEmptyState =
+    syncedCharacter &&
+    ownedFilter === "owned" &&
+    ownedMountCount === 0 &&
+    filteredMounts.length === 0 &&
+    !showFavoritesOnly
 
   function toggleSelection(value, selectedValues, setSelectedValues) {
     if (selectedValues.includes(value)) {
@@ -974,6 +982,34 @@ function App() {
           </aside>
 
           <main className="content-area">
+            {showFavoritesEmptyState ? (
+              <div className="mount-empty-state">
+                <h2>No favorite mounts yet</h2>
+                <p>
+                  Your favorite mounts will show up here. Favorite a mount to save it locally on this device.
+                </p>
+                <img
+                  className="mount-empty-state-tutorial"
+                  src="/tutorials/favoriteMount.png"
+                  alt="Tutorial showing how to favorite a mount"
+                />
+              </div>
+            ) : showFavoritesFilteredEmptyState ? (
+              <div className="mount-empty-state">
+                <h2>No favorites match these filters</h2>
+                <p>
+                  Try clearing a few filters or turn off favorites-only mode to see more mounts again.
+                </p>
+              </div>
+            ) : showOwnedEmptyState ? (
+              <div className="mount-empty-state">
+                <h2>No mounts owned yet</h2>
+                <p>
+                  This character does not have any synced mounts yet. Happy collecting!
+                </p>
+              </div>
+            ) : null}
+            {!showFavoritesEmptyState && !showFavoritesFilteredEmptyState && !showOwnedEmptyState ? (
             <div className="mount-grid">
               {filteredMounts.map((mount) => (
                 <div
@@ -1028,6 +1064,7 @@ function App() {
                 </div>
               ))}
             </div>
+            ) : null}
           </main>
         </div>
       </div>

@@ -1102,6 +1102,36 @@ body {
   min-width: 0;
 }
 
+.mount-empty-state {
+  max-width: calc(620px * var(--ui-scale));
+  margin: calc(36px * var(--ui-scale)) auto 0;
+  padding: calc(20px * var(--ui-scale)) calc(22px * var(--ui-scale));
+  border-radius: var(--panel-radius-md);
+  background: rgba(255, 255, 255, 0.035);
+  color: #ececec;
+  text-align: center;
+  transform: translateX(calc((var(--sidebar-width) + var(--gap-xl)) / -2));
+}
+
+.mount-empty-state h2 {
+  margin: 0 0 var(--space-xs);
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+
+.mount-empty-state p {
+  margin: 0;
+  color: #cfcfcf;
+  line-height: 1.6;
+}
+
+.mount-empty-state-tutorial {
+  display: block;
+  width: min(100%, calc(560px * var(--ui-scale)));
+  margin: var(--space-md) auto 0;
+  border-radius: var(--panel-radius-sm);
+}
+
 .type-filters {
   display: flex;
   flex-direction: column;
@@ -1489,6 +1519,10 @@ body {
 
   .filters-panel {
     max-height: none;
+  }
+
+  .mount-empty-state {
+    transform: none;
   }
 
   .type-filters,
