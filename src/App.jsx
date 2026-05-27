@@ -169,7 +169,7 @@ function App() {
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedExpansions, setSelectedExpansions] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [showOwnedOnly, setShowOwnedOnly] = useState(false)
+  const [ownedFilter, setOwnedFilter] = useState("all")
   const [showProjectNotice, setShowProjectNotice] = useState(true)
   const [selectedMount, setSelectedMount] = useState(null)
   const [showCharacterSync, setShowCharacterSync] = useState(false)
@@ -238,7 +238,11 @@ function App() {
 
     const matchesType = selectedTypes.length === 0 || selectedTypes.includes(mountType)
     const matchesExpansion = selectedExpansions.length === 0 || selectedExpansions.includes(expansion)
-    const matchesOwned = !showOwnedOnly || isMountOwned(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet)
+    const mountIsOwned = isMountOwned(mount, syncedCharacter, ownedMountIdSet, ownedMountNameSet)
+    const matchesOwned =
+      ownedFilter === "all" ||
+      (ownedFilter === "owned" && mountIsOwned) ||
+      (ownedFilter === "unowned" && !mountIsOwned)
 
     return matchesType && matchesExpansion && matchesSearch && matchesOwned
   })
@@ -408,7 +412,7 @@ function App() {
   function clearCharacterSync() {
     setCharacterSyncState(EMPTY_CHARACTER_SYNC_STATE)
     setCharacterForm(DEFAULT_CHARACTER_FORM)
-    setShowOwnedOnly(false)
+    setOwnedFilter("all")
     setCharacterResults([])
     setCharacterStatus({ tone: "idle", message: "" })
     setCharacterPanelStatus({ tone: "muted", message: "Character sync cleared." })
@@ -802,15 +806,24 @@ function App() {
                   <div className="filter-heading">
                     <h3>Owned</h3>
                   </div>
-                  <button
-                    className={showOwnedOnly ? "owned-filter-button active" : "owned-filter-button"}
-                    onClick={() => setShowOwnedOnly((currentValue) => !currentValue)}
-                  >
-                    Show Owned Only
-                  </button>
-                  <p className="filter-helper-text">
-                    Filter the grid down to mounts your synced character owns.
-                  </p>
+                  <div className="owned-filter-actions">
+                    <button
+                      className={ownedFilter === "owned" ? "owned-filter-button active" : "owned-filter-button"}
+                      onClick={() =>
+                        setOwnedFilter((currentValue) => (currentValue === "owned" ? "all" : "owned"))
+                      }
+                    >
+                      Show Owned
+                    </button>
+                    <button
+                      className={ownedFilter === "unowned" ? "owned-filter-button active" : "owned-filter-button"}
+                      onClick={() =>
+                        setOwnedFilter((currentValue) => (currentValue === "unowned" ? "all" : "unowned"))
+                      }
+                    >
+                      Show Unowned
+                    </button>
+                  </div>
                 </div>
               ) : null}
 

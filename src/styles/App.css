@@ -897,6 +897,11 @@ body {
   margin-bottom: calc(20px * var(--ui-scale));
 }
 
+.owned-filter-actions {
+  display: grid;
+  gap: var(--space-xs);
+}
+
 .owned-filter-button {
   width: 100%;
   min-height: var(--control-height);
@@ -925,13 +930,6 @@ body {
 .owned-filter-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.filter-helper-text {
-  margin: var(--space-xs) 0 0;
-  color: #bdbdbd;
-  font-size: 0.82rem;
-  line-height: 1.4;
 }
 
 .search-input {
