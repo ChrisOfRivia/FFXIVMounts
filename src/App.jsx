@@ -42,11 +42,11 @@ const SOURCE_ICONS = {
 const TYPE_GROUPS = [
   {
     label: "Instances",
-    types: ["Dungeon", "Raid", "Trial", "Chaotic Raid", "Deep Dungeon", "V&C Dungeon"],
+    types: ["Dungeon", "Raid", "Trial", "Chaotic Raid", "Deep Dungeon", "V&C Dungeon", "PvP"],
   },
   {
     label: "Exploration",
-    types: ["Eureka", , "Occult Crescent", "Treasure Hunt", "Voyages", "Bozja"],
+    types: ["Eureka", "Occult Crescent", "Treasure Hunt", "Voyages", "Bozja"],
   },
   {
     label: "Progression",
@@ -55,10 +55,6 @@ const TYPE_GROUPS = [
   {
     label: "Side Content",
     types: ["Tribal", "Island Sanctuary", "Gold Saucer", "Cosmic Exploration", "Wondrous Tails", "Skybuilders", "Gathering", "Crafting"],
-  },
-  {
-    label: "Competitive",
-    types: ["PvP"],
   },
   {
     label: "Special",
