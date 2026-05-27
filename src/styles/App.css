@@ -962,7 +962,12 @@ body {
 }
 
 .collection-filter-actions-single {
-  grid-template-columns: 1fr;
+  grid-template-columns: max-content;
+  justify-content: flex-start;
+}
+
+.collection-filter-actions-single .collection-filter-button {
+  width: calc(56px * var(--ui-scale));
 }
 
 .collection-filter-button {
