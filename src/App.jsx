@@ -176,6 +176,7 @@ function App() {
   const [showProjectNotice, setShowProjectNotice] = useState(true)
   const [selectedMount, setSelectedMount] = useState(null)
   const [showCharacterSync, setShowCharacterSync] = useState(false)
+  const [showScrollTopButton, setShowScrollTopButton] = useState(false)
   const [characterForm, setCharacterForm] = useState(DEFAULT_CHARACTER_FORM)
   const [characterResults, setCharacterResults] = useState([])
   const [characterStatus, setCharacterStatus] = useState({ tone: "idle", message: "" })
@@ -213,6 +214,19 @@ function App() {
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [])
+
+  useEffect(() => {
+    function handleScroll() {
+      setShowScrollTopButton(window.scrollY > 360)
+    }
+
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
     }
   }, [])
 
@@ -450,6 +464,10 @@ function App() {
     setCharacterResults([])
     setCharacterStatus({ tone: "idle", message: "" })
     setCharacterPanelStatus({ tone: "muted", message: "Character sync cleared." })
+  }
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const selectedMountExpansion = selectedMount ? getExpansion(selectedMount.patch) : null
@@ -1068,6 +1086,19 @@ function App() {
           </main>
         </div>
       </div>
+
+      {showScrollTopButton ? (
+        <button
+          className="scroll-top-button"
+          type="button"
+          onClick={scrollToTop}
+          aria-label="Back to top"
+          title="Back to top"
+        >
+          <span className="scroll-top-button-icon" aria-hidden="true" />
+          <span className="scroll-top-button-label">Top</span>
+        </button>
+      ) : null}
     </>
   )
 }
