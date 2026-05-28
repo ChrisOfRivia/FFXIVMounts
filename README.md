@@ -1,8 +1,10 @@
-# FFXIV Mount & Minion Tracker
+# FFXIVTracker
 
-A fan-made React + Vite project for browsing, filtering, and tracking mounts and minions from Final Fantasy XIV. Use the live site at [ffxivmounts.vercel.app](https://ffxivmounts.vercel.app/), published on Vercel.
+FFXIVTracker is a fan-made React + Vite project for browsing, filtering, and tracking mounts and minions from Final Fantasy XIV.
 
-This app pulls live data from the public [FFXIV Collect](https://ffxivcollect.com/) API and presents it in a more browseable tracker-style interface with filtering, source links, favorites, detail modals, and character-based ownership syncing.
+Live site: [ffxivtracker.vercel.app](https://ffxivtracker.vercel.app/)
+
+It pulls live data from the public [FFXIV Collect](https://ffxivcollect.com/) API and presents it in a browsable tracker-style interface with filtering, source links, favorites, detail modals, and character-based ownership syncing.
 
 ## What It Does
 

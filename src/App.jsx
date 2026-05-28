@@ -64,8 +64,8 @@ function App() {
   useEffect(() => {
     document.title =
       activeRoute === HOME_ROUTE
-        ? "FFXIV Mount & Minion Tracker"
-        : COLLECTION_PAGES[activeRoute]?.title || "FFXIV Mount & Minion Tracker"
+        ? "FFXIVTracker"
+        : `${COLLECTION_PAGES[activeRoute]?.title || "FFXIVTracker"} | FFXIVTracker`
   }, [activeRoute])
 
   useEffect(() => {
