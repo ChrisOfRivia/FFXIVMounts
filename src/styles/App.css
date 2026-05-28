@@ -2758,12 +2758,12 @@ html:has(.page-shell-minions) .page-header-character-muted {
   }
 
   .mount-grid {
-    justify-content: center;
-    gap: var(--space-md);
+    justify-content: flex-start;
+    gap: calc(20px * var(--ui-scale));
   }
 
   .mount-card {
-    width: min(100%, calc(320px * var(--ui-scale)));
+    width: var(--mount-card-width);
   }
 
   .minion-card {
