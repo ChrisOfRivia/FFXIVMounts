@@ -1,6 +1,6 @@
 # FFXIV Mount Tracker
 
-A fan-made React + Vite project for browsing, filtering, and tracking mounts from Final Fantasy XIV.
+A fan-made React + Vite project for browsing, filtering, and tracking mounts from Final Fantasy XIV. Use the live site at [ffxivmounts.vercel.app](https://ffxivmounts.vercel.app/), published on Vercel.
 
 This app pulls mount data from the public [FFXIV Collect](https://ffxivcollect.com/) API and presents it in a more browseable tracker-style interface with filtering, source links, favorites, and character-based ownership syncing.
 
