@@ -1516,6 +1516,17 @@ html:has(.page-shell-mounts) .mount-detail-source-pill:hover {
     0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
+.page-shell-mounts .mount-card {
+  flex: 0 0 min(
+    var(--mount-card-width),
+    calc((100% - (4 * var(--mount-grid-gap))) / 5)
+  );
+  width: min(
+    var(--mount-card-width),
+    calc((100% - (4 * var(--mount-grid-gap))) / 5)
+  );
+}
+
 .page-shell-mounts .mount-card-owned {
   background:
     radial-gradient(circle at top, rgba(111, 184, 95, 0.18) 0%, rgba(111, 184, 95, 0) 30%),
@@ -2323,6 +2334,11 @@ html:has(.page-shell-minions) .page-header-character-muted {
   justify-content: flex-start;
 }
 
+.page-shell-mounts .mount-grid {
+  --mount-grid-gap: calc(20px * var(--ui-scale));
+  gap: var(--mount-grid-gap);
+}
+
 .mount-card {
   position: relative;
   overflow: hidden;
@@ -2920,6 +2936,12 @@ html:has(.page-shell-minions) .page-header-character-muted {
 
   .mount-grid {
     gap: 14px;
+  }
+
+  .page-shell-mounts .mount-card {
+    flex-basis: 100%;
+    width: 100%;
+    max-width: 100%;
   }
 
   .mount-card {
