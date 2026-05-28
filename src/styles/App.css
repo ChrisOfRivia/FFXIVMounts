@@ -1517,14 +1517,9 @@ html:has(.page-shell-mounts) .mount-detail-source-pill:hover {
 }
 
 .page-shell-mounts .mount-card {
-  flex: 0 0 min(
-    var(--mount-card-width),
-    calc((100% - (4 * var(--mount-grid-gap))) / 5)
-  );
-  width: min(
-    var(--mount-card-width),
-    calc((100% - (4 * var(--mount-grid-gap))) / 5)
-  );
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .page-shell-mounts .mount-card-owned {
@@ -2335,8 +2330,9 @@ html:has(.page-shell-minions) .page-header-character-muted {
 }
 
 .page-shell-mounts .mount-grid {
-  --mount-grid-gap: calc(20px * var(--ui-scale));
-  gap: var(--mount-grid-gap);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: calc(20px * var(--ui-scale));
 }
 
 .mount-card {
@@ -2778,6 +2774,10 @@ html:has(.page-shell-minions) .page-header-character-muted {
     gap: calc(20px * var(--ui-scale));
   }
 
+  .page-shell-mounts .mount-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .mount-card {
     width: var(--mount-card-width);
   }
@@ -2939,9 +2939,12 @@ html:has(.page-shell-minions) .page-header-character-muted {
   }
 
   .page-shell-mounts .mount-card {
-    flex-basis: 100%;
     width: 100%;
     max-width: 100%;
+  }
+
+  .page-shell-mounts .mount-grid {
+    grid-template-columns: 1fr;
   }
 
   .mount-card {
