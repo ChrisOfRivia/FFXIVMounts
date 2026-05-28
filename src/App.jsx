@@ -84,25 +84,26 @@ function App() {
 
   return (
     <div className={`app-route-shell app-route-shell-${activeRoute}`}>
-      <nav className="collection-nav" aria-label="Primary navigation">
-        <a
-          className={activeRoute === HOME_ROUTE ? "collection-nav-link active" : "collection-nav-link"}
-          href="#/"
-          aria-current={activeRoute === HOME_ROUTE ? "page" : undefined}
-        >
-          Home
-        </a>
-        {Object.values(COLLECTION_PAGES).map((page) => (
+      {activeRoute !== HOME_ROUTE ? (
+        <nav className="collection-nav" aria-label="Primary navigation">
           <a
-            key={page.key}
-            className={page.key === activeRoute ? "collection-nav-link active" : "collection-nav-link"}
-            href={`#/${page.key}`}
-            aria-current={page.key === activeRoute ? "page" : undefined}
+            className={activeRoute === HOME_ROUTE ? "collection-nav-link active" : "collection-nav-link"}
+            href="#/"
           >
-            {page.key === "mounts" ? "Mounts" : "Minions"}
+            Home
           </a>
-        ))}
-      </nav>
+          {Object.values(COLLECTION_PAGES).map((page) => (
+            <a
+              key={page.key}
+              className={page.key === activeRoute ? "collection-nav-link active" : "collection-nav-link"}
+              href={`#/${page.key}`}
+              aria-current={page.key === activeRoute ? "page" : undefined}
+            >
+              {page.key === "mounts" ? "Mounts" : "Minions"}
+            </a>
+          ))}
+        </nav>
+      ) : null}
 
       {activeRoute === HOME_ROUTE ? (
         <HomePage
