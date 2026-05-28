@@ -1,30 +1,32 @@
-# FFXIV Mount Tracker
+# FFXIV Mount & Minion Tracker
 
-A fan-made React + Vite project for browsing, filtering, and tracking mounts from Final Fantasy XIV. Use the live site at [ffxivmounts.vercel.app](https://ffxivmounts.vercel.app/), published on Vercel.
+A fan-made React + Vite project for browsing, filtering, and tracking mounts and minions from Final Fantasy XIV. Use the live site at [ffxivmounts.vercel.app](https://ffxivmounts.vercel.app/), published on Vercel.
 
-This app pulls mount data from the public [FFXIV Collect](https://ffxivcollect.com/) API and presents it in a more browseable tracker-style interface with filtering, source links, favorites, and character-based ownership syncing.
+This app pulls live data from the public [FFXIV Collect](https://ffxivcollect.com/) API and presents it in a more browseable tracker-style interface with filtering, source links, favorites, detail modals, and character-based ownership syncing.
 
 ## What It Does
 
-- Fetches live mount data from FFXIV Collect
-- Displays mount artwork, source details, patch/expansion info, and ownership counts
+- Fetches live mount and minion data from FFXIV Collect
+- Displays artwork, source details, patch/expansion info, and ownership counts
 - Filters mounts by source type and expansion
-- Lets you favorite mounts for quicker browsing
-- Opens a detailed modal view for each mount
+- Browses minions with source filters, ownership tracking, and Verminion details
+- Lets you favorite mounts and minions for quicker browsing
+- Opens a detailed modal view for each collection entry
 - Links users to relevant external sources when available
-- Supports character sync so owned and missing mounts can be highlighted in the UI
+- Supports character sync so owned and missing entries can be highlighted in the UI
 
 ## Current Features
 
-- Dynamic API-driven mount list
-- Search by mount name or source text
+- Dynamic API-driven mount and minion lists
+- Search by name or source text
 - Source-type filtering
 - Expansion filtering from ARR through Dawntrail
 - Compact sticky filter sidebar
 - Favorites system stored locally
 - Character search and sync integration
 - Owned / missing collection filtering after sync
-- Mount detail modal with richer information
+- Mount and minion detail modals with richer information
+- Minion Verminion stats and source details
 - Responsive layout for desktop and mobile
 
 ## Tech Stack
@@ -41,8 +43,8 @@ Character sync is handled through local API-style middleware in development/prev
 
 - search for characters by name, world, and data center
 - refresh character data when possible
-- retrieve owned mount data
-- compare synced ownership against the mount list in the app
+- retrieve owned mount and minion data
+- compare synced ownership against the collection list in the app
 
 ## Running Locally
 
@@ -70,7 +72,7 @@ This is a non-commercial fan-made project.
 
 Final Fantasy XIV and all related names, media, and assets belong to Square Enix.
 
-Mount data is provided through the public [FFXIV Collect](https://ffxivcollect.com/) service.
+Mount and minion data is provided through the public [FFXIV Collect](https://ffxivcollect.com/) service.
 
 ## Future Ideas
 
