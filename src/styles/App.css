@@ -931,6 +931,12 @@ body {
   min-width: 0;
 }
 
+.page-header-copy-unsynced {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .page-header h1 {
   margin: 0;
   text-align: center;
@@ -948,6 +954,10 @@ body {
 
 .page-header-character-muted {
   color: #b9b9b9;
+}
+
+.page-header-launch-button {
+  margin-top: var(--space-md);
 }
 
 .page-header-spacer {
@@ -1568,6 +1578,10 @@ body {
     width: 100%;
   }
 
+  .page-header-copy-unsynced {
+    align-items: center;
+  }
+
   .page-header h1 {
     font-size: clamp(2.2rem, 7vw, 3rem);
     line-height: 1.05;
@@ -1581,6 +1595,10 @@ body {
   .character-launch-button {
     width: 100%;
     justify-content: center;
+  }
+
+  .page-header-launch-button {
+    width: min(100%, calc(320px * var(--ui-scale)));
   }
 
   .character-summary-stack,

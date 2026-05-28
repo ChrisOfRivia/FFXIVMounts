@@ -770,29 +770,17 @@ function App() {
 
       <div className="page-shell">
         <header className="page-header">
-          <div className="page-header-row">
-            {syncedCharacter ? (
+          {syncedCharacter ? (
+            <div className="page-header-row">
               <div className="page-header-spacer" aria-hidden="true" />
-            ) : (
-              <button className="character-launch-button" onClick={openCharacterSyncModal}>
-                Sync Character
-              </button>
-            )}
 
-            <div className="page-header-copy">
-              <h1>FFXIV Mount Tracker</h1>
-              {syncedCharacter ? (
+              <div className="page-header-copy">
+                <h1>FFXIV Mount Tracker</h1>
                 <p className="page-header-character">
                   {syncedCharacter.name} - {syncedCharacter.world} - {ownedMountCount}/{totalMountCount} mounts owned
                 </p>
-              ) : (
-                <p className="page-header-character page-header-character-muted">
-                  Sync a character to highlight owned mounts.
-                </p>
-              )}
-            </div>
+              </div>
 
-            {syncedCharacter ? (
               <div className="character-summary-stack">
                 <div className="character-summary-card">
                   <div className="character-summary-main">
@@ -842,10 +830,18 @@ function App() {
                   </p>
                 ) : null}
               </div>
-            ) : (
-              <div className="page-header-spacer" aria-hidden="true" />
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="page-header-copy page-header-copy-unsynced">
+              <h1>FFXIV Mount Tracker</h1>
+              <p className="page-header-character page-header-character-muted">
+                Sync a character to highlight owned mounts.
+              </p>
+              <button className="character-launch-button page-header-launch-button" onClick={openCharacterSyncModal}>
+                Sync Character
+              </button>
+            </div>
+          )}
         </header>
 
         <div className="app-shell">
