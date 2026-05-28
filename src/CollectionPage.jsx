@@ -175,7 +175,7 @@ const GARLAND_CURRENCY_NAME_OVERRIDES = {
 }
 
 const INITIAL_CHARACTER_RESULTS_COUNT = 12
-const PROJECT_NOTICE_STORAGE_KEY = "ffxiv-tracker-project-notice-dismissed"
+const PROJECT_NOTICE_STORAGE_KEY = "ffxiv-tracker-project-notice-dismissed-v2"
 const DEFAULT_CHARACTER_FORM = {
   region: "",
   dataCenter: "",
