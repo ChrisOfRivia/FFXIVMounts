@@ -1,4 +1,4 @@
-import { getOwnedMounts, searchCharacters } from "./characterSync.js"
+import { getOwnedMinions, getOwnedMounts, searchCharacters } from "./characterSync.js"
 
 export function createCharacterSyncMiddleware() {
   return async function characterSyncMiddleware(req, res, next) {
@@ -33,6 +33,22 @@ export function createCharacterSyncMiddleware() {
         sendJson(res, 200, {
           ownedMountIds: ownedMounts.map((mount) => mount.id).filter(Boolean),
           ownedMountNames: ownedMounts.map((mount) => mount.name).filter(Boolean),
+        })
+        return
+      }
+
+      if (requestUrl.pathname === "/api/character-minions") {
+        const id = requestUrl.searchParams.get("id")
+
+        if (!id) {
+          sendJson(res, 400, { error: "Character id is required." })
+          return
+        }
+
+        const ownedMinions = await getOwnedMinions(id)
+        sendJson(res, 200, {
+          ownedMountIds: ownedMinions.map((minion) => minion.id).filter(Boolean),
+          ownedMountNames: ownedMinions.map((minion) => minion.name).filter(Boolean),
         })
         return
       }

@@ -49,9 +49,17 @@ export async function searchCharacters({ name, server = "", dataCenter = "" }) {
 }
 
 export async function getOwnedMounts(characterId) {
+  return getOwnedCollectableEntries(characterId, "mounts")
+}
+
+export async function getOwnedMinions(characterId) {
+  return getOwnedCollectableEntries(characterId, "minions")
+}
+
+async function getOwnedCollectableEntries(characterId, collectionPath) {
   await refreshCharacter(characterId).catch(() => null)
 
-  const response = await fetch(`${FFXIV_COLLECT_BASE_URL}/api/characters/${characterId}/mounts/owned`, {
+  const response = await fetch(`${FFXIV_COLLECT_BASE_URL}/api/characters/${characterId}/${collectionPath}/owned`, {
     headers: {
       Accept: "application/json",
       "User-Agent": USER_AGENT,
@@ -67,11 +75,11 @@ export async function getOwnedMounts(characterId) {
   const payload = await response.json()
   const results = Array.isArray(payload?.results) ? payload.results : Array.isArray(payload) ? payload : []
   return results
-    .map((mount) => ({
-      id: mount.id,
-      name: mount.name,
+    .map((entry) => ({
+      id: entry.id,
+      name: entry.name,
     }))
-    .filter((mount) => mount.id || mount.name)
+    .filter((entry) => entry.id || entry.name)
 }
 
 export async function getOwnedMountIds(characterId) {
