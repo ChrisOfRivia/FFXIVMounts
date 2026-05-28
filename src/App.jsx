@@ -42,10 +42,16 @@ const COLLECTION_PAGES = {
 
 function App() {
   const [activeRoute, setActiveRoute] = useState(() => getRouteFromHash(window.location.hash))
+  const [showHomeDisclaimer, setShowHomeDisclaimer] = useState(() => getRouteFromHash(window.location.hash) === HOME_ROUTE)
 
   useEffect(() => {
     function handleHashChange() {
-      setActiveRoute(getRouteFromHash(window.location.hash))
+      const nextRoute = getRouteFromHash(window.location.hash)
+      setActiveRoute(nextRoute)
+
+      if (nextRoute !== HOME_ROUTE) {
+        setShowHomeDisclaimer(false)
+      }
     }
 
     window.addEventListener("hashchange", handleHashChange)
@@ -61,6 +67,18 @@ function App() {
         ? "FFXIV Mount & Minion Tracker"
         : COLLECTION_PAGES[activeRoute]?.title || "FFXIV Mount & Minion Tracker"
   }, [activeRoute])
+
+  useEffect(() => {
+    if (activeRoute === HOME_ROUTE && showHomeDisclaimer) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [activeRoute, showHomeDisclaimer])
 
   const activeConfig = COLLECTION_PAGES[activeRoute] || null
 
@@ -87,7 +105,10 @@ function App() {
       </nav>
 
       {activeRoute === HOME_ROUTE ? (
-        <HomePage />
+        <HomePage
+          showDisclaimer={showHomeDisclaimer}
+          onDismissDisclaimer={() => setShowHomeDisclaimer(false)}
+        />
       ) : (
         <CollectionPage key={activeConfig.key} config={activeConfig} />
       )}
@@ -95,9 +116,27 @@ function App() {
   )
 }
 
-function HomePage() {
+function HomePage({ showDisclaimer, onDismissDisclaimer }) {
   return (
     <main className="page-shell page-shell-home home-page">
+      {showDisclaimer ? (
+        <div className="project-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="project-notice-title">
+          <div className="project-notice-card">
+            <p className="project-notice-eyebrow">Heads Up</p>
+            <h2 id="project-notice-title">This app is still in development.</h2>
+            <p className="project-notice-text">
+              Some features may be unfinished or buggy while the tracker is still being built out.
+            </p>
+            <button
+              className="project-notice-button"
+              onClick={onDismissDisclaimer}
+              type="button"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      ) : null}
       <section className="home-hero">
         <p className="home-eyebrow">Final Fantasy XIV collection tracker</p>
         <h1>Start Tracking!</h1>

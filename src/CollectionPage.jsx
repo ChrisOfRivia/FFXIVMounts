@@ -175,7 +175,6 @@ const GARLAND_CURRENCY_NAME_OVERRIDES = {
 }
 
 const INITIAL_CHARACTER_RESULTS_COUNT = 12
-const PROJECT_NOTICE_STORAGE_KEY = "ffxiv-tracker-project-notice-dismissed-v2"
 const DEFAULT_CHARACTER_FORM = {
   region: "",
   dataCenter: "",
@@ -197,7 +196,6 @@ function CollectionPage({ config }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [ownedFilter, setOwnedFilter] = useState("all")
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
-  const [showProjectNotice, setShowProjectNotice] = useState(() => getStoredProjectNoticeState())
   const [selectedMount, setSelectedMount] = useState(null)
   const [showCharacterSync, setShowCharacterSync] = useState(false)
   const [showScrollTopButton, setShowScrollTopButton] = useState(false)
@@ -219,12 +217,12 @@ function CollectionPage({ config }) {
   }, [config.dataEndpoint])
 
   useEffect(() => {
-    document.body.style.overflow = showProjectNotice || selectedMount || showCharacterSync ? "hidden" : ""
+    document.body.style.overflow = selectedMount || showCharacterSync ? "hidden" : ""
 
     return () => {
       document.body.style.overflow = ""
     }
-  }, [showProjectNotice, selectedMount, showCharacterSync])
+  }, [selectedMount, showCharacterSync])
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -271,15 +269,6 @@ function CollectionPage({ config }) {
 
     window.localStorage.removeItem(config.favoritesStorageKey)
   }, [favoriteMountIds, config.favoritesStorageKey])
-
-  useEffect(() => {
-    if (showProjectNotice) {
-      window.localStorage.removeItem(PROJECT_NOTICE_STORAGE_KEY)
-      return
-    }
-
-    window.localStorage.setItem(PROJECT_NOTICE_STORAGE_KEY, "true")
-  }, [showProjectNotice])
 
   const syncedCharacter = characterSyncState.character
   const ownedMountIdSet = new Set(characterSyncState.ownedMountIds)
@@ -516,24 +505,6 @@ function CollectionPage({ config }) {
 
   return (
     <>
-      {showProjectNotice ? (
-        <div className="project-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="project-notice-title">
-          <div className="project-notice-card">
-            <p className="project-notice-eyebrow">Heads Up</p>
-            <h2 id="project-notice-title">This project is still unfinished.</h2>
-            <p className="project-notice-text">
-              Some features, styling and data handling are still in progress, so things may change or break while the tracker is being built out.
-            </p>
-            <button
-              className="project-notice-button"
-              onClick={() => setShowProjectNotice(false)}
-            >
-              Continue
-            </button>
-          </div>
-        </div>
-      ) : null}
-
       {selectedMount ? (
         <div
           className="mount-detail-overlay"
@@ -1722,14 +1693,6 @@ function getStoredCharacterSyncState(storageKey) {
   } catch {
     return EMPTY_CHARACTER_SYNC_STATE
   }
-}
-
-function getStoredProjectNoticeState() {
-  if (typeof window === "undefined") {
-    return true
-  }
-
-  return window.localStorage.getItem(PROJECT_NOTICE_STORAGE_KEY) !== "true"
 }
 
 function getStoredFavoriteMountIds(storageKey) {
